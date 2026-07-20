@@ -6,8 +6,8 @@
   "description": "Automatic battery-aware Minecraft performance profiles for macOS.",
   "authors": ["benjamincalledur10-bit"],
   "contact": {
-    "sources": "https://github.com/benjamincalledur10-bit/Creacion_de_Mods",
-    "issues": "https://github.com/benjamincalledur10-bit/Creacion_de_Mods/issues"
+    "sources": "https://github.com/benjamincalledur10-bit/BatteryCraft",
+    "issues": "https://github.com/benjamincalledur10-bit/BatteryCraft/issues"
   },
   "license": "MIT",
   "icon": "assets/batterycraft/icon.png",
