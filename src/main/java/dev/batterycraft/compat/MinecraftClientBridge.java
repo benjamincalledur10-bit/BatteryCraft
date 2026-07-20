@@ -27,23 +27,6 @@ public final class MinecraftClientBridge {
         return null;
     }
 
-    public boolean keyDown(int keyCode) {
-        try {
-            Object client = client();
-            if (client == null) return false;
-            Object window = readField(client, new String[]{"window", "field_1704"});
-            if (window == null) window = invokeNoArgs(client, new String[]{"getWindow"});
-            if (window == null) return false;
-            Object handle = invokeNoArgs(window, new String[]{"getWindow", "getHandle", "method_4490"});
-            if (!(handle instanceof Long value)) return false;
-            Class<?> glfw = Class.forName("org.lwjgl.glfw.GLFW");
-            int state = (Integer) glfw.getMethod("glfwGetKey", long.class, int.class).invoke(null, value, keyCode);
-            return state == 1;
-        } catch (ReflectiveOperationException | RuntimeException ignored) {
-            return false;
-        }
-    }
-
     public void message(String text, boolean actionBar) {
         Object client = client();
         if (client == null) return;
@@ -82,17 +65,6 @@ public final class MinecraftClientBridge {
                     } catch (ReflectiveOperationException ignored) { }
                 }
             } catch (ClassNotFoundException ignored) { }
-        }
-        return null;
-    }
-
-    private static Object invokeNoArgs(Object target, String[] names) {
-        for (String name : names) {
-            try {
-                Method method = target.getClass().getMethod(name);
-                method.setAccessible(true);
-                return method.invoke(target);
-            } catch (ReflectiveOperationException ignored) { }
         }
         return null;
     }
