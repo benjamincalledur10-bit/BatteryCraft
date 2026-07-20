@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "batterycraft",
-  "version": "0.0.1-alpha",
+  "version": "1.0.0-beta.1",
   "name": "BatteryCraft",
   "description": "Automatic battery-aware Minecraft performance profiles for macOS.",
   "authors": ["benjamincalledur10-bit"],
@@ -10,6 +10,7 @@
     "issues": "https://github.com/benjamincalledur10-bit/Creacion_de_Mods/issues"
   },
   "license": "MIT",
+  "icon": "assets/batterycraft/icon.png",
   "environment": "client",
   "entrypoints": { "client": ["dev.batterycraft.BatteryCraftClient"] },
   "depends": { "fabricloader": ">=0.16.0", "minecraft": "1.21.x", "java": ">=21" }

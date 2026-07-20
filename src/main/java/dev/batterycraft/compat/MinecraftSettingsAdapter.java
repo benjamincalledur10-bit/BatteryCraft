@@ -1,6 +1,7 @@
 package dev.batterycraft.compat;
 
 import dev.batterycraft.profile.PowerProfile;
+import dev.batterycraft.profile.ProfileSettings;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,11 +15,11 @@ public final class MinecraftSettingsAdapter {
     };
     private final Map<String, Object> originalValues = new HashMap<>();
 
-    public synchronized boolean apply(PowerProfile profile) {
+    public synchronized boolean apply(PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded) {
         try {
             Object client = findClient();
             if (client == null) return false;
-            Runnable update = () -> updateOnClientThread(client, profile);
+            Runnable update = () -> updateOnClientThread(client, profile, profileSettings, sodiumLoaded);
             Method execute = findMethod(client.getClass(), new String[]{"execute", "method_18859"}, Runnable.class);
             if (execute != null) execute.invoke(client, update); else update.run();
             return true;
@@ -28,7 +29,7 @@ public final class MinecraftSettingsAdapter {
         }
     }
 
-    private void updateOnClientThread(Object client, PowerProfile profile) {
+    private void updateOnClientThread(Object client, PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded) {
         try {
             Object options = readField(client, new String[]{"options", "field_1690"});
             if (options == null) return;
@@ -36,12 +37,30 @@ public final class MinecraftSettingsAdapter {
                 restore(options);
                 return;
             }
-            setOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"}, profile.maxFps());
-            setOption(options, "viewDistance", new String[]{"renderDistance", "viewDistance", "field_1870"}, profile.renderDistance());
-            setOption(options, "simulationDistance", new String[]{"simulationDistance", "field_34959"}, profile.simulationDistance());
-            setParticleOption(options, profile.particleLevel());
+            setOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"}, profileSettings.maxFps());
+            setOption(options, "viewDistance", new String[]{"renderDistance", "viewDistance", "field_1870"}, profileSettings.renderDistance());
+            setOption(options, "simulationDistance", new String[]{"simulationDistance", "field_34959"}, profileSettings.simulationDistance());
+            setParticleOption(options, profileSettings.particleLevel());
+            setOption(options, "entityShadows", new String[]{"entityShadows", "field_1888"}, profileSettings.entityShadows());
+            setOption(options, "biomeBlend", new String[]{"biomeBlendRadius", "field_1878"}, profileSettings.biomeBlendRadius());
+            setCloudOption(options, profileSettings.clouds());
+            if (sodiumLoaded) {
+                setOption(options, "entityDistance", new String[]{"entityDistanceScaling", "entityDistanceScale", "field_24214"}, profileSettings.entityDistanceScale());
+            }
         } catch (ReflectiveOperationException error) {
             System.err.println("[BatteryCraft] Settings update failed: " + error.getMessage());
+        }
+    }
+
+    private void setCloudOption(Object options, boolean enabled) throws ReflectiveOperationException {
+        Object option = readField(options, new String[]{"cloudRenderMode", "cloudStatus", "field_1814"});
+        if (option == null) return;
+        Object current = getOptionValue(option);
+        originalValues.putIfAbsent("clouds", current);
+        if (current instanceof Enum<?> enumValue) {
+            Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
+            int index = enabled ? Math.min(1, constants.length - 1) : 0;
+            setOptionValue(option, constants[index]);
         }
     }
 
@@ -68,6 +87,10 @@ public final class MinecraftSettingsAdapter {
         restoreOption(options, "viewDistance", new String[]{"renderDistance", "viewDistance", "field_1870"});
         restoreOption(options, "simulationDistance", new String[]{"simulationDistance", "field_34959"});
         restoreOption(options, "particles", new String[]{"particles", "field_1882"});
+        restoreOption(options, "entityShadows", new String[]{"entityShadows", "field_1888"});
+        restoreOption(options, "biomeBlend", new String[]{"biomeBlendRadius", "field_1878"});
+        restoreOption(options, "clouds", new String[]{"cloudRenderMode", "cloudStatus", "field_1814"});
+        restoreOption(options, "entityDistance", new String[]{"entityDistanceScaling", "entityDistanceScale", "field_24214"});
         originalValues.clear();
     }
 

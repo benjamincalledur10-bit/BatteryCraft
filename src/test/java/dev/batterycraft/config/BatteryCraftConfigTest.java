@@ -15,6 +15,32 @@ class BatteryCraftConfigTest {
         BatteryCraftConfig config = BatteryCraftConfig.load(path);
         assertTrue(config.enabled());
         assertEquals(10, config.pollSeconds());
-        assertEquals(config, BatteryCraftConfig.load(path));
+        BatteryCraftConfig reloaded = BatteryCraftConfig.load(path);
+        assertEquals(config.lowThreshold(), reloaded.lowThreshold());
+        assertEquals(config.profile(dev.batterycraft.profile.PowerProfile.BATTERY),
+                reloaded.profile(dev.batterycraft.profile.PowerProfile.BATTERY));
+    }
+
+    @Test
+    void persistsBetaOptionsAndProfiles(@TempDir Path directory) throws Exception {
+        Path path = directory.resolve("batterycraft.json");
+        BatteryCraftConfig config = BatteryCraftConfig.load(path);
+        config.notifications(false);
+        config.hudIndicator(false);
+        config.sodiumIntegration(false);
+        config.thermalMode(true);
+        config.manualMode(dev.batterycraft.profile.ManualMode.LOW_BATTERY);
+        config.profile(dev.batterycraft.profile.PowerProfile.BATTERY,
+                new dev.batterycraft.profile.ProfileSettings(75, 12, 9, 0, false, false, 3, 0.7));
+        config.save();
+
+        BatteryCraftConfig reloaded = BatteryCraftConfig.load(path);
+        assertEquals(false, reloaded.notifications());
+        assertEquals(false, reloaded.hudIndicator());
+        assertEquals(false, reloaded.sodiumIntegration());
+        assertTrue(reloaded.thermalMode());
+        assertEquals(dev.batterycraft.profile.ManualMode.LOW_BATTERY, reloaded.manualMode());
+        assertEquals(config.profile(dev.batterycraft.profile.PowerProfile.BATTERY),
+                reloaded.profile(dev.batterycraft.profile.PowerProfile.BATTERY));
     }
 }

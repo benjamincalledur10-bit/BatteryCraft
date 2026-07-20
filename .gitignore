@@ -3,3 +3,5 @@ build/
 run/
 .idea/
 .DS_Store
+tmp/
+output/

@@ -28,9 +28,9 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 val targets = mapOf(
-    "mc1_21" to Pair(">=1.21 <26.1-", "mc1.21"),
-    "mc26_1" to Pair(">=26.1 <26.2-", "mc26.1"),
-    "mc26_2" to Pair(">=26.2 <26.3-", "mc26.2")
+    "mc1_21" to Pair("1.21.x", "mc1.21"),
+    "mc26_1" to Pair("26.1.x", "mc26.1"),
+    "mc26_2" to Pair("26.2.x", "mc26.2")
 )
 
 targets.forEach { (taskSuffix, target) ->
@@ -42,6 +42,7 @@ targets.forEach { (taskSuffix, target) ->
         archiveClassifier.set(target.second)
         from(sourceSets.main.get().output.classesDirs)
         from("src/targets/$taskSuffix")
+        from("src/main/resources")
         manifest {
             attributes("Implementation-Title" to "BatteryCraft", "Implementation-Version" to providers.gradleProperty("mod_version").get())
         }
