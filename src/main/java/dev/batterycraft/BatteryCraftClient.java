@@ -5,6 +5,7 @@ import dev.batterycraft.battery.MacBatteryProvider;
 import dev.batterycraft.battery.MacThermalProvider;
 import dev.batterycraft.compat.MinecraftClientBridge;
 import dev.batterycraft.compat.MinecraftSettingsAdapter;
+import dev.batterycraft.compat.ConfigurableKeyMappings;
 import dev.batterycraft.config.BatteryCraftConfig;
 import dev.batterycraft.profile.ManualMode;
 import dev.batterycraft.profile.PowerProfile;
@@ -21,19 +22,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class BatteryCraftClient implements ClientModInitializer {
-    public static final String VERSION = "1.0.0-beta.1";
+    public static final String VERSION = "1.0.0-beta.2";
     private final MacBatteryProvider batteryProvider = new MacBatteryProvider();
     private final MacThermalProvider thermalProvider = new MacThermalProvider();
     private final MinecraftSettingsAdapter settings = new MinecraftSettingsAdapter();
     private final MinecraftClientBridge client = new MinecraftClientBridge();
+    private final ConfigurableKeyMappings keyMappings = new ConfigurableKeyMappings();
     private final SessionStats stats = new SessionStats();
     private volatile PowerProfile activeProfile;
     private volatile BatteryStatus lastBattery;
     private volatile long nextBatteryRead;
     private volatile long nextThermalRead;
     private volatile boolean thermalWarning;
-    private volatile boolean cyclePressed;
-    private volatile boolean configPressed;
     private BatteryCraftConfig config;
     private boolean sodiumLoaded;
 
@@ -42,7 +42,9 @@ public final class BatteryCraftClient implements ClientModInitializer {
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve("batterycraft.json");
         config = BatteryCraftConfig.load(configPath);
         sodiumLoaded = FabricLoader.getInstance().isModLoaded("sodium");
-        System.out.printf("[BatteryCraft] Starting %s macOS=%s sodium=%s%n", VERSION, batteryProvider.isSupported(), sodiumLoaded);
+        boolean mappingsRegistered = keyMappings.register();
+        System.out.printf("[BatteryCraft] Starting %s macOS=%s sodium=%s keyMappings=%s%n",
+                VERSION, batteryProvider.isSupported(), sodiumLoaded, mappingsRegistered);
         if (!batteryProvider.isSupported()) {
             System.out.println("[BatteryCraft] macOS was not detected; automatic profiles are unavailable.");
             return;
@@ -105,21 +107,16 @@ public final class BatteryCraftClient implements ClientModInitializer {
     }
 
     private void hotkeys() {
-        boolean cycleDown = client.keyDown(config.cycleKey());
-        if (cycleDown && !cyclePressed) {
+        while (keyMappings.consumeCycle()) {
             config.manualMode(config.manualMode().next());
             saveConfig();
             activeProfile = null;
             applySelectedProfile();
             client.message("BatteryCraft modo: " + config.manualMode(), false);
         }
-        cyclePressed = cycleDown;
-
-        boolean configDown = client.keyDown(config.configKey());
-        if (configDown && !configPressed) {
+        while (keyMappings.consumeConfig()) {
             BatteryCraftConfigScreen.open(config, this::configurationChanged, stats::summary);
         }
-        configPressed = configDown;
     }
 
     private void configurationChanged() {

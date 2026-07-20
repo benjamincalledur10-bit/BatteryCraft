@@ -2,12 +2,14 @@
 
 BatteryCraft is a client-side Fabric mod that automatically reduces Minecraft's power usage when a MacBook runs on battery.
 
-## 1.0.0-beta.1
+## 1.0.0-beta.2
 
 - Automatic battery, low-battery and emergency profiles.
 - Restores the player's original settings when power returns.
-- F9 opens the visual configuration screen.
-- F8 cycles through automatic, manual and disabled modes.
+- Two native Minecraft key mappings appear under Options > Controls > Key Binds > BatteryCraft.
+- `B` cycles through automatic, manual and disabled modes by default.
+- `O` opens the visual configuration screen by default.
+- Both keys can be reassigned or unbound by the player and work normally on macOS.
 - Optional notifications and in-game status indicator.
 - Editable FPS, render distance, simulation distance, particles, clouds, entity shadows, biome blend and entity distance.
 - Sodium detection and optional entity-distance integration.
@@ -19,11 +21,11 @@ The configuration is stored at `config/batterycraft.json`. Existing alpha config
 
 ## Downloads
 
-- `batterycraft-1.0.0-beta.1-mc1.21.jar`: Minecraft 1.21.x
-- `batterycraft-1.0.0-beta.1-mc26.1.jar`: Minecraft 26.1.x
-- `batterycraft-1.0.0-beta.1-mc26.2.jar`: Minecraft 26.2.x
+- `batterycraft-1.0.0-beta.2-mc1.21.jar`: Minecraft 1.21.x
+- `batterycraft-1.0.0-beta.2-mc26.1.jar`: Minecraft 26.1.x
+- `batterycraft-1.0.0-beta.2-mc26.2.jar`: Minecraft 26.2.x
 
-Fabric API is not required. Minecraft 1.21.x needs Java 21; Minecraft 26.1.x and 26.2.x need Java 25.
+Fabric API is required. Minecraft 1.21.x needs Java 21; Minecraft 26.1.x and 26.2.x need Java 25.
 
 ## Tested combinations
 

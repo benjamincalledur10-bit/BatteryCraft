@@ -44,7 +44,7 @@ public final class BatteryCraftConfigScreen {
     }
 
     private static JFrame build(BatteryCraftConfig config, Runnable afterSave, Supplier<String> sessionSummary) {
-        JFrame frame = new JFrame("BatteryCraft 1.0.0-beta.1");
+        JFrame frame = new JFrame("BatteryCraft 1.0.0-beta.2");
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override public void windowClosed(java.awt.event.WindowEvent event) { current = null; }
@@ -70,7 +70,7 @@ public final class BatteryCraftConfigScreen {
         general.add(new JLabel("Bateria critica (%)")); general.add(critical);
         general.add(new JLabel("Revision cada (segundos)")); general.add(poll);
         general.add(new JLabel("Modo")); general.add(mode);
-        general.add(new JLabel("Atajos")); general.add(new JLabel("F8: cambiar modo | F9: configuracion"));
+        general.add(new JLabel("Atajos")); general.add(new JLabel("Cambialos en Opciones > Controles > BatteryCraft"));
 
         Map<PowerProfile, ProfilePanel> panels = new EnumMap<>(PowerProfile.class);
         JTabbedPane tabs = new JTabbedPane();

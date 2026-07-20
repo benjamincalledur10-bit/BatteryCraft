@@ -24,8 +24,6 @@ public final class BatteryCraftConfig {
     private int pollSeconds = 10;
     private int lowThreshold = 30;
     private int criticalThreshold = 15;
-    private int cycleKey = 297;
-    private int configKey = 298;
     private ManualMode manualMode = ManualMode.AUTOMATIC;
 
     private BatteryCraftConfig(Path path) {
@@ -51,8 +49,6 @@ public final class BatteryCraftConfig {
             config.pollSeconds = bounded(integer(json, "pollSeconds", config.pollSeconds), 5, 300);
             config.lowThreshold = bounded(integer(json, "lowThreshold", config.lowThreshold), 2, 99);
             config.criticalThreshold = bounded(integer(json, "criticalThreshold", config.criticalThreshold), 1, config.lowThreshold - 1);
-            config.cycleKey = integer(json, "cycleKey", config.cycleKey);
-            config.configKey = integer(json, "configKey", config.configKey);
             config.manualMode = enumValue(json, "manualMode", ManualMode.class, config.manualMode);
             config.loadProfile(json, PowerProfile.BATTERY, "battery");
             config.loadProfile(json, PowerProfile.LOW_BATTERY, "lowBattery");
@@ -84,7 +80,6 @@ public final class BatteryCraftConfig {
                 .append(line("hudIndicator", hudIndicator)).append(line("sodiumIntegration", sodiumIntegration))
                 .append(line("thermalMode", thermalMode)).append(line("pollSeconds", pollSeconds))
                 .append(line("lowThreshold", lowThreshold)).append(line("criticalThreshold", criticalThreshold))
-                .append(line("cycleKey", cycleKey)).append(line("configKey", configKey))
                 .append(line("manualMode", manualMode.name()));
         appendProfile(json, "battery", profiles.get(PowerProfile.BATTERY));
         appendProfile(json, "lowBattery", profiles.get(PowerProfile.LOW_BATTERY));
@@ -154,8 +149,6 @@ public final class BatteryCraftConfig {
     public void lowThreshold(int value) { lowThreshold = bounded(value, 2, 99); }
     public int criticalThreshold() { return criticalThreshold; }
     public void criticalThreshold(int value) { criticalThreshold = bounded(value, 1, lowThreshold - 1); }
-    public int cycleKey() { return cycleKey; }
-    public int configKey() { return configKey; }
     public ManualMode manualMode() { return manualMode; }
     public void manualMode(ManualMode value) { manualMode = value; }
 }

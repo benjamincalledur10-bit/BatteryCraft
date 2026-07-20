@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.2 - 2026-07-20
+
+- Replaced macOS-unfriendly F8/F9 polling with native Minecraft key mappings.
+- Added a BatteryCraft category under the standard key-bindings screen.
+- Added freely reassignable controls for cycling profiles and opening configuration.
+- Changed defaults to B and O so MacBook media keys are no longer required.
+- Added Spanish and English control names.
+- Fabric API is now required for reliable cross-version key registration.
+
 ## 1.0.0-beta.1 - 2026-07-20
 
 - Added a visual configuration screen opened with F9.
