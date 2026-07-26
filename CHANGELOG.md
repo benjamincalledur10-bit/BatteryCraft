@@ -2,14 +2,38 @@
 
 ## 1.0.0-beta.3 - 2026-07-26
 
-- Added crash-safe recovery for the player's original Minecraft settings.
-- Added macOS battery-time estimates to the optional HUD indicator.
-- Added configurable profile-transition delays to prevent rapid switching.
+### Highlights
+
+- Added **Smart Recovery**, which preserves the player's original Minecraft settings on disk while a power-saving profile is active.
+- BatteryCraft can now restore those settings after an unexpected game shutdown or crash, not only after reconnecting the charger.
+- Added the estimated macOS battery time to the optional in-game HUD.
+
+### Profiles and HUD
+
+- Added a configurable transition delay to prevent rapid profile switching when the power state or battery level changes.
+- Critical-battery mode still activates immediately for safety.
 - Added a configurable HUD refresh interval.
-- Added a bilingual English/Spanish configuration interface.
-- Added a diagnostics panel for macOS support, CPU architecture, Sodium, thermal state, battery data, and pending recovery.
-- Added safer atomic configuration recovery storage with automatic cleanup after restoration.
-- Expanded automated coverage for recovery, transition stabilization, configuration migration, and macOS battery parsing.
+- The HUD now displays the active profile, battery percentage, and estimated remaining time when macOS provides it.
+
+### Interface and diagnostics
+
+- Added automatic English and Spanish localization to the configuration interface.
+- Added a diagnostics panel showing macOS detection, CPU architecture, Sodium availability, thermal-warning state, battery information, and pending recovery status.
+- Increased the configuration window size to accommodate the new controls and diagnostic information.
+
+### Reliability
+
+- Recovery snapshots are written safely and removed automatically after the original settings have been restored.
+- Existing beta.2 configuration files are upgraded automatically with safe defaults.
+- Expanded automated coverage for crash recovery, transition stabilization, configuration migration, and macOS battery-output parsing.
+
+### Compatibility
+
+- Minecraft 1.21.x: Java 21
+- Minecraft 26.1.x: Java 25
+- Minecraft 26.2.x: Java 25
+- Fabric API is required.
+- BatteryCraft remains a client-side macOS mod and does not require installation on the server.
 
 ## 1.0.0-beta.2 - 2026-07-20
 
