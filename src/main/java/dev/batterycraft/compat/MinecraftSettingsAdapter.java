@@ -6,6 +6,7 @@ import dev.batterycraft.profile.ProfileSettings;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,18 @@ public final class MinecraftSettingsAdapter {
             "net.minecraft.class_310", "net.minecraft.client.Minecraft", "net.minecraft.client.MinecraftClient"
     };
     private final Map<String, Object> originalValues = new HashMap<>();
+    private final Map<String, String> persistedValues = new HashMap<>();
+    private RecoveryStore recoveryStore;
+
+    public synchronized void configureRecovery(Path path) {
+        recoveryStore = new RecoveryStore(path);
+        persistedValues.clear();
+        persistedValues.putAll(recoveryStore.load());
+    }
+
+    public synchronized boolean hasPendingRecovery() {
+        return recoveryStore != null && recoveryStore.exists();
+    }
 
     public synchronized boolean apply(PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded) {
         try {
@@ -56,7 +69,7 @@ public final class MinecraftSettingsAdapter {
         Object option = readField(options, new String[]{"cloudRenderMode", "cloudStatus", "field_1814"});
         if (option == null) return;
         Object current = getOptionValue(option);
-        originalValues.putIfAbsent("clouds", current);
+        rememberOriginal("clouds", current);
         if (current instanceof Enum<?> enumValue) {
             Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
             int index = enabled ? Math.min(1, constants.length - 1) : 0;
@@ -68,7 +81,7 @@ public final class MinecraftSettingsAdapter {
         Object option = readField(options, new String[]{"particles", "field_1882"});
         if (option == null) return;
         Object current = getOptionValue(option);
-        originalValues.putIfAbsent("particles", current);
+        rememberOriginal("particles", current);
         if (current instanceof Enum<?> enumValue) {
             Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
             setOptionValue(option, constants[Math.min(level, constants.length - 1)]);
@@ -78,7 +91,7 @@ public final class MinecraftSettingsAdapter {
     private void setOption(Object options, String key, String[] names, Object value) throws ReflectiveOperationException {
         Object option = readField(options, names);
         if (option == null) return;
-        originalValues.putIfAbsent(key, getOptionValue(option));
+        rememberOriginal(key, getOptionValue(option));
         setOptionValue(option, value);
     }
 
@@ -92,12 +105,50 @@ public final class MinecraftSettingsAdapter {
         restoreOption(options, "clouds", new String[]{"cloudRenderMode", "cloudStatus", "field_1814"});
         restoreOption(options, "entityDistance", new String[]{"entityDistanceScaling", "entityDistanceScale", "field_24214"});
         originalValues.clear();
+        persistedValues.clear();
+        if (recoveryStore != null) recoveryStore.clear();
     }
 
     private void restoreOption(Object options, String key, String[] names) throws ReflectiveOperationException {
-        if (!originalValues.containsKey(key)) return;
         Object option = readField(options, names);
-        if (option != null) setOptionValue(option, originalValues.get(key));
+        if (option == null) return;
+        Object value = originalValues.get(key);
+        if (value == null && persistedValues.containsKey(key)) {
+            value = decode(persistedValues.get(key), getOptionValue(option));
+        }
+        if (value != null) setOptionValue(option, value);
+    }
+
+    private void rememberOriginal(String key, Object value) {
+        if (persistedValues.containsKey(key)) return;
+        if (originalValues.putIfAbsent(key, value) != null || value == null) return;
+        persistedValues.putIfAbsent(key, encode(value));
+        if (recoveryStore != null) recoveryStore.save(persistedValues);
+    }
+
+    private static String encode(Object value) {
+        if (value instanceof Enum<?> enumValue) {
+            return "enum:" + enumValue.getDeclaringClass().getName() + ":" + enumValue.name();
+        }
+        return value.getClass().getSimpleName().toLowerCase() + ":" + value;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static Object decode(String encoded, Object current) {
+        int separator = encoded.indexOf(':');
+        if (separator < 0 || current == null) return null;
+        String value = encoded.substring(encoded.lastIndexOf(':') + 1);
+        try {
+            if (current instanceof Integer) return Integer.valueOf(value);
+            if (current instanceof Double) return Double.valueOf(value);
+            if (current instanceof Float) return Float.valueOf(value);
+            if (current instanceof Long) return Long.valueOf(value);
+            if (current instanceof Boolean) return Boolean.valueOf(value);
+            if (current instanceof Enum<?> enumValue) {
+                return Enum.valueOf((Class<? extends Enum>) enumValue.getDeclaringClass(), value);
+            }
+        } catch (IllegalArgumentException ignored) { }
+        return null;
     }
 
     private Object findClient() throws ReflectiveOperationException {

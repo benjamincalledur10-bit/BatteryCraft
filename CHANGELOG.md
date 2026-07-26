@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-beta.3 - 2026-07-26
+
+- Added crash-safe recovery for the player's original Minecraft settings.
+- Added macOS battery-time estimates to the optional HUD indicator.
+- Added configurable profile-transition delays to prevent rapid switching.
+- Added a configurable HUD refresh interval.
+- Added a bilingual English/Spanish configuration interface.
+- Added a diagnostics panel for macOS support, CPU architecture, Sodium, thermal state, battery data, and pending recovery.
+- Added safer atomic configuration recovery storage with automatic cleanup after restoration.
+- Expanded automated coverage for recovery, transition stabilization, configuration migration, and macOS battery parsing.
+
 ## 1.0.0-beta.2 - 2026-07-20
 
 - Replaced macOS-unfriendly F8/F9 polling with native Minecraft key mappings.

@@ -10,8 +10,10 @@ import dev.batterycraft.config.BatteryCraftConfig;
 import dev.batterycraft.profile.ManualMode;
 import dev.batterycraft.profile.PowerProfile;
 import dev.batterycraft.profile.ProfileSettings;
+import dev.batterycraft.profile.ProfileStabilizer;
 import dev.batterycraft.stats.SessionStats;
 import dev.batterycraft.ui.BatteryCraftConfigScreen;
+import dev.batterycraft.ui.LocalizedText;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -22,13 +24,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class BatteryCraftClient implements ClientModInitializer {
-    public static final String VERSION = "1.0.0-beta.2";
+    public static final String VERSION = "1.0.0-beta.3";
     private final MacBatteryProvider batteryProvider = new MacBatteryProvider();
     private final MacThermalProvider thermalProvider = new MacThermalProvider();
     private final MinecraftSettingsAdapter settings = new MinecraftSettingsAdapter();
     private final MinecraftClientBridge client = new MinecraftClientBridge();
     private final ConfigurableKeyMappings keyMappings = new ConfigurableKeyMappings();
     private final SessionStats stats = new SessionStats();
+    private final ProfileStabilizer stabilizer = new ProfileStabilizer();
     private volatile PowerProfile activeProfile;
     private volatile BatteryStatus lastBattery;
     private volatile long nextBatteryRead;
@@ -41,10 +44,12 @@ public final class BatteryCraftClient implements ClientModInitializer {
     public void onInitializeClient() {
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve("batterycraft.json");
         config = BatteryCraftConfig.load(configPath);
+        settings.configureRecovery(configPath.resolveSibling("batterycraft-recovery.properties"));
         sodiumLoaded = FabricLoader.getInstance().isModLoaded("sodium");
         boolean mappingsRegistered = keyMappings.register();
-        System.out.printf("[BatteryCraft] Starting %s macOS=%s sodium=%s keyMappings=%s%n",
-                VERSION, batteryProvider.isSupported(), sodiumLoaded, mappingsRegistered);
+        System.out.printf("[BatteryCraft] Starting %s macOS=%s arch=%s sodium=%s keyMappings=%s recovery=%s%n",
+                VERSION, batteryProvider.isSupported(), System.getProperty("os.arch", "unknown"),
+                sodiumLoaded, mappingsRegistered, settings.hasPendingRecovery());
         if (!batteryProvider.isSupported()) {
             System.out.println("[BatteryCraft] macOS was not detected; automatic profiles are unavailable.");
             return;
@@ -75,14 +80,17 @@ public final class BatteryCraftClient implements ClientModInitializer {
             thermalWarning = thermalProvider.hasThermalWarning();
             if (thermalWarning) applySelectedProfile();
         }
-        if (config.hudIndicator() && lastBattery != null && now / 5_000 != (now - 1_000) / 5_000) {
-            client.message("BatteryCraft: " + displayName(activeProfile) + " | " + lastBattery.percentage() + "%", true);
+        long hudInterval = config.hudIntervalSeconds() * 1_000L;
+        if (config.hudIndicator() && lastBattery != null && now / hudInterval != (now - 1_000) / hudInterval) {
+            String remaining = lastBattery.remainingText().isEmpty() ? "" : " | " + lastBattery.remainingText();
+            client.message("BatteryCraft: " + LocalizedText.profile(activeProfile) + " | "
+                    + lastBattery.percentage() + "%" + remaining, true);
         }
     }
 
     private synchronized void applySelectedProfile() {
         if (lastBattery == null) return;
-        PowerProfile selected = selectProfile();
+        PowerProfile selected = stabilizer.select(selectProfile(), System.currentTimeMillis(), config.transitionDelaySeconds());
         if (selected == activeProfile) return;
         ProfileSettings values = selected == PowerProfile.PLUGGED_IN ? null : config.profile(selected);
         boolean sodiumIntegration = sodiumLoaded && config.sodiumIntegration();
@@ -90,8 +98,8 @@ public final class BatteryCraftClient implements ClientModInitializer {
             activeProfile = selected;
             stats.profileChanged(selected);
             String message = selected == PowerProfile.PLUGGED_IN
-                    ? "BatteryCraft: ajustes originales restaurados"
-                    : "BatteryCraft: " + displayName(selected) + " - " + values.maxFps() + " FPS";
+                    ? "BatteryCraft: " + LocalizedText.value("original settings restored", "ajustes originales restaurados")
+                    : "BatteryCraft: " + LocalizedText.profile(selected) + " - " + values.maxFps() + " FPS";
             if (config.notifications()) client.message(message, false);
             System.out.printf("[BatteryCraft] Profile=%s battery=%d%% pluggedIn=%s thermal=%s sodium=%s%n",
                     selected, lastBattery.percentage(), lastBattery.pluggedIn(), thermalWarning, sodiumIntegration);
@@ -111,16 +119,18 @@ public final class BatteryCraftClient implements ClientModInitializer {
             config.manualMode(config.manualMode().next());
             saveConfig();
             activeProfile = null;
+            stabilizer.reset();
             applySelectedProfile();
-            client.message("BatteryCraft modo: " + config.manualMode(), false);
+            client.message("BatteryCraft " + LocalizedText.value("mode", "modo") + ": " + config.manualMode(), false);
         }
         while (keyMappings.consumeConfig()) {
-            BatteryCraftConfigScreen.open(config, this::configurationChanged, stats::summary);
+            BatteryCraftConfigScreen.open(config, this::configurationChanged, stats::summary, this::diagnostics);
         }
     }
 
     private void configurationChanged() {
         activeProfile = null;
+        stabilizer.reset();
         nextBatteryRead = 0;
         applySelectedProfile();
     }
@@ -130,13 +140,13 @@ public final class BatteryCraftClient implements ClientModInitializer {
         catch (Exception error) { System.err.println("[BatteryCraft] Could not save config: " + error.getMessage()); }
     }
 
-    private static String displayName(PowerProfile profile) {
-        if (profile == null) return "Iniciando";
-        return switch (profile) {
-            case PLUGGED_IN -> "Conectado";
-            case BATTERY -> "Ahorro";
-            case LOW_BATTERY -> "Ahorro intenso";
-            case CRITICAL_BATTERY -> "Emergencia";
-        };
+    private String diagnostics() {
+        String battery = lastBattery == null ? LocalizedText.value("waiting", "esperando")
+                : lastBattery.percentage() + "% " + lastBattery.remainingText();
+        return "<html><b>" + LocalizedText.value("Diagnostics", "Diagnóstico") + ":</b> macOS="
+                + batteryProvider.isSupported() + " | arch=" + System.getProperty("os.arch", "unknown")
+                + " | Sodium=" + sodiumLoaded + " | thermal=" + thermalWarning
+                + " | recovery=" + settings.hasPendingRecovery() + "<br>"
+                + LocalizedText.value("Battery", "Batería") + "=" + battery + "</html>";
     }
 }

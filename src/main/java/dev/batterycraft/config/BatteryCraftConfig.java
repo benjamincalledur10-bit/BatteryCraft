@@ -22,6 +22,8 @@ public final class BatteryCraftConfig {
     private boolean sodiumIntegration = true;
     private boolean thermalMode;
     private int pollSeconds = 10;
+    private int transitionDelaySeconds = 8;
+    private int hudIntervalSeconds = 10;
     private int lowThreshold = 30;
     private int criticalThreshold = 15;
     private ManualMode manualMode = ManualMode.AUTOMATIC;
@@ -47,6 +49,8 @@ public final class BatteryCraftConfig {
             config.sodiumIntegration = bool(json, "sodiumIntegration", config.sodiumIntegration);
             config.thermalMode = bool(json, "thermalMode", config.thermalMode);
             config.pollSeconds = bounded(integer(json, "pollSeconds", config.pollSeconds), 5, 300);
+            config.transitionDelaySeconds = bounded(integer(json, "transitionDelaySeconds", config.transitionDelaySeconds), 0, 60);
+            config.hudIntervalSeconds = bounded(integer(json, "hudIntervalSeconds", config.hudIntervalSeconds), 5, 60);
             config.lowThreshold = bounded(integer(json, "lowThreshold", config.lowThreshold), 2, 99);
             config.criticalThreshold = bounded(integer(json, "criticalThreshold", config.criticalThreshold), 1, config.lowThreshold - 1);
             config.manualMode = enumValue(json, "manualMode", ManualMode.class, config.manualMode);
@@ -79,6 +83,8 @@ public final class BatteryCraftConfig {
                 .append(line("enabled", enabled)).append(line("notifications", notifications))
                 .append(line("hudIndicator", hudIndicator)).append(line("sodiumIntegration", sodiumIntegration))
                 .append(line("thermalMode", thermalMode)).append(line("pollSeconds", pollSeconds))
+                .append(line("transitionDelaySeconds", transitionDelaySeconds))
+                .append(line("hudIntervalSeconds", hudIntervalSeconds))
                 .append(line("lowThreshold", lowThreshold)).append(line("criticalThreshold", criticalThreshold))
                 .append(line("manualMode", manualMode.name()));
         appendProfile(json, "battery", profiles.get(PowerProfile.BATTERY));
@@ -145,6 +151,10 @@ public final class BatteryCraftConfig {
     public void thermalMode(boolean value) { thermalMode = value; }
     public int pollSeconds() { return pollSeconds; }
     public void pollSeconds(int value) { pollSeconds = bounded(value, 5, 300); }
+    public int transitionDelaySeconds() { return transitionDelaySeconds; }
+    public void transitionDelaySeconds(int value) { transitionDelaySeconds = bounded(value, 0, 60); }
+    public int hudIntervalSeconds() { return hudIntervalSeconds; }
+    public void hudIntervalSeconds(int value) { hudIntervalSeconds = bounded(value, 5, 60); }
     public int lowThreshold() { return lowThreshold; }
     public void lowThreshold(int value) { lowThreshold = bounded(value, 2, 99); }
     public int criticalThreshold() { return criticalThreshold; }

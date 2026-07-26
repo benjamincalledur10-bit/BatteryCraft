@@ -29,6 +29,8 @@ class BatteryCraftConfigTest {
         config.hudIndicator(false);
         config.sodiumIntegration(false);
         config.thermalMode(true);
+        config.transitionDelaySeconds(12);
+        config.hudIntervalSeconds(20);
         config.manualMode(dev.batterycraft.profile.ManualMode.LOW_BATTERY);
         config.profile(dev.batterycraft.profile.PowerProfile.BATTERY,
                 new dev.batterycraft.profile.ProfileSettings(75, 12, 9, 0, false, false, 3, 0.7));
@@ -39,6 +41,8 @@ class BatteryCraftConfigTest {
         assertEquals(false, reloaded.hudIndicator());
         assertEquals(false, reloaded.sodiumIntegration());
         assertTrue(reloaded.thermalMode());
+        assertEquals(12, reloaded.transitionDelaySeconds());
+        assertEquals(20, reloaded.hudIntervalSeconds());
         assertEquals(dev.batterycraft.profile.ManualMode.LOW_BATTERY, reloaded.manualMode());
         assertEquals(config.profile(dev.batterycraft.profile.PowerProfile.BATTERY),
                 reloaded.profile(dev.batterycraft.profile.PowerProfile.BATTERY));
