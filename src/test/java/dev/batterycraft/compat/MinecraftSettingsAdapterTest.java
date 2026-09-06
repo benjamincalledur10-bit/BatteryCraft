@@ -56,6 +56,25 @@ class MinecraftSettingsAdapterTest {
         assertEquals(165, client.field_1690.field_1909.method_41753());
     }
 
+    @Test
+    void preservesLighterVisualSettingsAndCanReleaseFpsCap() {
+        class_310 client = class_310.method_1551();
+        reset(client);
+        client.field_1690.field_1870.method_41748(4);
+        client.field_1690.field_1882.method_41748(net.minecraft.class_315.Particle.MINIMAL);
+        client.field_1690.field_1814.method_41748(net.minecraft.class_315.Cloud.OFF);
+        MinecraftSettingsAdapter adapter = new MinecraftSettingsAdapter();
+        adapter.apply(PowerProfile.BATTERY, new ProfileSettings(120, 8, 5, 1, false, false, 0, 0.65), true);
+        assertEquals(4, client.field_1690.field_1870.method_41753());
+        assertEquals(120, client.field_1690.field_1909.method_41753());
+        assertEquals(net.minecraft.class_315.Particle.MINIMAL, client.field_1690.field_1882.method_41753());
+        assertEquals(net.minecraft.class_315.Cloud.OFF, client.field_1690.field_1814.method_41753());
+        adapter.apply(PowerProfile.BATTERY, new ProfileSettings(0, 8, 5, 1, false, false, 0, 0.65), true);
+        assertEquals(144, client.field_1690.field_1909.method_41753());
+        adapter.apply(PowerProfile.PLUGGED_IN, null, true);
+        assertEquals(4, client.field_1690.field_1870.method_41753());
+    }
+
     private static void reset(class_310 client) {
         client.field_1690.field_1909.method_41748(144);
         client.field_1690.field_1870.method_41748(16);

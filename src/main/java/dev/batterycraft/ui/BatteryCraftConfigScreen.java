@@ -48,7 +48,7 @@ public final class BatteryCraftConfigScreen {
     private static JFrame build(BatteryCraftConfig config, Runnable afterSave, Supplier<String> sessionSummary,
                                 Supplier<String> diagnostics) {
         boolean spanish = Locale.getDefault().getLanguage().equalsIgnoreCase("es");
-        JFrame frame = new JFrame("BatteryCraft 1.0.0-beta.3");
+        JFrame frame = new JFrame("BatteryCraft " + dev.batterycraft.BatteryCraftClient.VERSION);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override public void windowClosed(java.awt.event.WindowEvent event) { current = null; }
@@ -56,14 +56,18 @@ public final class BatteryCraftConfigScreen {
 
         JCheckBox enabled = new JCheckBox(text(spanish, "Enable BatteryCraft", "Activar BatteryCraft"), config.enabled());
         JCheckBox notifications = new JCheckBox(text(spanish, "Show notifications", "Mostrar avisos"), config.notifications());
-        JCheckBox indicator = new JCheckBox(text(spanish, "Show HUD indicator", "Mostrar indicador HUD"), config.hudIndicator());
+        JCheckBox indicator = new JCheckBox(text(spanish, "Show periodic status message", "Mostrar estado periódicamente"), config.hudIndicator());
         JCheckBox sodium = new JCheckBox(text(spanish, "Sodium integration", "Integración con Sodium"), config.sodiumIntegration());
         JCheckBox thermal = new JCheckBox(text(spanish, "Experimental thermal mode", "Modo térmico experimental"), config.thermalMode());
         JSpinner low = new JSpinner(new SpinnerNumberModel(config.lowThreshold(), 2, 99, 1));
         JSpinner critical = new JSpinner(new SpinnerNumberModel(config.criticalThreshold(), 1, 98, 1));
         JSpinner poll = new JSpinner(new SpinnerNumberModel(config.pollSeconds(), 5, 300, 1));
         JSpinner transitionDelay = new JSpinner(new SpinnerNumberModel(config.transitionDelaySeconds(), 0, 60, 1));
-        JSpinner hudInterval = new JSpinner(new SpinnerNumberModel(config.hudIntervalSeconds(), 5, 60, 1));
+        JSpinner hudInterval = new JSpinner(new SpinnerNumberModel(config.hudIntervalSeconds() % 60 == 0 ? config.hudIntervalSeconds() / 60 : config.hudIntervalSeconds(), 1, Integer.MAX_VALUE, 1));
+        JComboBox<String> intervalUnit = new JComboBox<>(new String[]{text(spanish, "Seconds", "Segundos"), text(spanish, "Minutes", "Minutos")});
+        intervalUnit.setSelectedIndex(config.hudIntervalSeconds() % 60 == 0 ? 1 : 0);
+        JPanel intervalControls = new JPanel(new GridLayout(1, 2, 6, 0));
+        intervalControls.add(hudInterval); intervalControls.add(intervalUnit);
         JComboBox<ManualMode> mode = new JComboBox<>(ManualMode.values());
         mode.setSelectedItem(config.manualMode());
 
@@ -76,7 +80,7 @@ public final class BatteryCraftConfigScreen {
         general.add(new JLabel(text(spanish, "Critical battery (%)", "Batería crítica (%)"))); general.add(critical);
         general.add(new JLabel(text(spanish, "Battery poll (seconds)", "Revisión de batería (segundos)"))); general.add(poll);
         general.add(new JLabel(text(spanish, "Transition delay (seconds)", "Espera de transición (segundos)"))); general.add(transitionDelay);
-        general.add(new JLabel(text(spanish, "HUD interval (seconds)", "Intervalo del HUD (segundos)"))); general.add(hudInterval);
+        general.add(new JLabel(text(spanish, "Status interval", "Intervalo del estado"))); general.add(intervalControls);
         general.add(new JLabel(text(spanish, "Mode", "Modo"))); general.add(mode);
         general.add(new JLabel(text(spanish, "Shortcuts", "Atajos")));
         general.add(new JLabel(text(spanish, "Change them in Options > Controls > BatteryCraft",
@@ -104,6 +108,13 @@ public final class BatteryCraftConfigScreen {
         JButton save = new JButton(text(spanish, "Save and apply", "Guardar y aplicar"));
         save.addActionListener(event -> {
             try {
+                hudInterval.commitEdit();
+                long intervalSeconds = ((Number) hudInterval.getValue()).longValue() * (intervalUnit.getSelectedIndex() == 1 ? 60L : 1L);
+                if (intervalSeconds < 5 || intervalSeconds > Integer.MAX_VALUE) {
+                    throw new java.text.ParseException(text(spanish, "Choose an interval between 5 seconds and 35,791,394 minutes.", "Elige un intervalo entre 5 segundos y 35.791.394 minutos."), 0);
+                }
+                for (ProfilePanel panel : panels.values()) panel.commit();
+                low.commitEdit(); critical.commitEdit(); poll.commitEdit(); transitionDelay.commitEdit();
                 config.enabled(enabled.isSelected());
                 config.notifications(notifications.isSelected());
                 config.hudIndicator(indicator.isSelected());
@@ -113,7 +124,7 @@ public final class BatteryCraftConfigScreen {
                 config.criticalThreshold((Integer) critical.getValue());
                 config.pollSeconds((Integer) poll.getValue());
                 config.transitionDelaySeconds((Integer) transitionDelay.getValue());
-                config.hudIntervalSeconds((Integer) hudInterval.getValue());
+                config.hudIntervalSeconds((int) intervalSeconds);
                 config.manualMode((ManualMode) mode.getSelectedItem());
                 panels.forEach((profile, panel) -> config.profile(profile, panel.value()));
                 config.save();
@@ -122,7 +133,7 @@ public final class BatteryCraftConfigScreen {
                 diagnosticLabel.setText(diagnostics.get());
                 JOptionPane.showMessageDialog(frame, text(spanish, "Configuration saved.", "Configuración guardada."),
                         "BatteryCraft", JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException error) {
+            } catch (IOException | java.text.ParseException error) {
                 JOptionPane.showMessageDialog(frame, error.getMessage(), "BatteryCraft", JOptionPane.ERROR_MESSAGE);
             }
         });
@@ -161,7 +172,7 @@ public final class BatteryCraftConfigScreen {
         private ProfilePanel(ProfileSettings settings, boolean spanish) {
             super(new GridLayout(0, 2, 8, 8));
             setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
-            fps = spinner(settings.maxFps(), 15, 260, 5);
+            fps = spinner(settings.maxFps(), 0, 260, 5);
             render = spinner(settings.renderDistance(), 2, 64, 1);
             simulation = spinner(settings.simulationDistance(), 2, 32, 1);
             particles = spinner(settings.particleLevel(), 0, 2, 1);
@@ -169,7 +180,7 @@ public final class BatteryCraftConfigScreen {
             entityDistance = new JSpinner(new SpinnerNumberModel(settings.entityDistanceScale(), 0.25, 1.0, 0.05));
             clouds = new JCheckBox(text(spanish, "Enabled", "Activadas"), settings.clouds());
             shadows = new JCheckBox(text(spanish, "Enabled", "Activadas"), settings.entityShadows());
-            row(text(spanish, "Maximum FPS", "FPS máximos"), fps);
+            row(text(spanish, "FPS cap (0 = Minecraft setting)", "Límite FPS (0 = ajuste de Minecraft)"), fps);
             row(text(spanish, "Render distance", "Distancia de renderizado"), render);
             row(text(spanish, "Simulation distance", "Distancia de simulación"), simulation);
             row(text(spanish, "Particles (0-2)", "Partículas (0-2)"), particles);
@@ -184,6 +195,10 @@ public final class BatteryCraftConfigScreen {
         }
 
         private void row(String label, java.awt.Component component) { add(new JLabel(label)); add(component); }
+
+        private void commit() throws java.text.ParseException {
+            for (JSpinner input : new JSpinner[]{fps, render, simulation, particles, biomeBlend, entityDistance}) input.commitEdit();
+        }
 
         private ProfileSettings value() {
             return new ProfileSettings((Integer) fps.getValue(), (Integer) render.getValue(),

@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.0-beta.4 - Unreleased
+
+### Less intrusive status display
+
+- Disabled the periodic center-screen status message by default.
+- Existing beta.3 configurations are migrated once with the periodic message disabled.
+- Renamed the option to make its behavior clear; players can still enable it manually.
+- Increased the optional status interval limit to custom seconds or minutes (including 15 and 30 minutes).
+
+### Rendering and frame rate
+
+- New default caps of 120 / 90 / 60 FPS with lower rendering and simulation distances.
+- Set a profile FPS cap to zero to retain Minecraft's original cap, including after switching from a capped profile.
+- Preserve lighter original visual settings instead of increasing their workload.
+- Migrate unchanged legacy profiles while preserving custom profiles.
+- Periodic messages now wait a full interval after enabling or reconfiguring them and stop when the mod is disabled.
+- These changes adjust rendering workload; FPS and battery-life gains require in-game benchmarking.
+
+### Reliability
+
+- Added a configuration version for safe future migrations.
+- The configuration window now reads the mod version from a single shared value.
+- Added automated coverage for beta.3 migration and longer status intervals.
+
 ## 1.0.0-beta.3 - 2026-07-26
 
 ### Highlights

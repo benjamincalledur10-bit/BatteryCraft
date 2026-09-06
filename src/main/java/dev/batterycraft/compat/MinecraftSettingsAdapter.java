@@ -50,7 +50,11 @@ public final class MinecraftSettingsAdapter {
                 restore(options);
                 return;
             }
-            setOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"}, profileSettings.maxFps());
+            if (profileSettings.maxFps() == 0) {
+                restoreOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"});
+            } else {
+                setOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"}, profileSettings.maxFps());
+            }
             setOption(options, "viewDistance", new String[]{"renderDistance", "viewDistance", "field_1870"}, profileSettings.renderDistance());
             setOption(options, "simulationDistance", new String[]{"simulationDistance", "field_34959"}, profileSettings.simulationDistance());
             setParticleOption(options, profileSettings.particleLevel());
@@ -72,7 +76,9 @@ public final class MinecraftSettingsAdapter {
         rememberOriginal("clouds", current);
         if (current instanceof Enum<?> enumValue) {
             Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
-            int index = enabled ? Math.min(1, constants.length - 1) : 0;
+            Object baseline = originalValue("clouds", current);
+            int originalIndex = baseline instanceof Enum<?> original ? original.ordinal() : enumValue.ordinal();
+            int index = enabled ? Math.min(originalIndex, 1) : 0;
             setOptionValue(option, constants[index]);
         }
     }
@@ -84,15 +90,31 @@ public final class MinecraftSettingsAdapter {
         rememberOriginal("particles", current);
         if (current instanceof Enum<?> enumValue) {
             Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
-            setOptionValue(option, constants[Math.min(level, constants.length - 1)]);
+            Object baseline = originalValue("particles", current);
+            int originalIndex = baseline instanceof Enum<?> original ? original.ordinal() : enumValue.ordinal();
+            setOptionValue(option, constants[Math.min(Math.max(level, originalIndex), constants.length - 1)]);
         }
     }
 
     private void setOption(Object options, String key, String[] names, Object value) throws ReflectiveOperationException {
         Object option = readField(options, names);
         if (option == null) return;
-        rememberOriginal(key, getOptionValue(option));
+        Object current = getOptionValue(option);
+        rememberOriginal(key, current);
+        Object original = originalValues.get(key);
+        if (original == null && persistedValues.containsKey(key)) original = decode(persistedValues.get(key), current);
+        // Visual profiles are ceilings: never raise a player's lighter settings.
+        if (!key.equals("maxFps") && original instanceof Number baseline && value instanceof Number requested) {
+            if (requested.doubleValue() > baseline.doubleValue()) value = original;
+        } else if (original instanceof Boolean baseline && value instanceof Boolean requested) {
+            value = baseline && requested;
+        }
         setOptionValue(option, value);
+    }
+
+    private Object originalValue(String key, Object current) {
+        Object original = originalValues.get(key);
+        return original == null && persistedValues.containsKey(key) ? decode(persistedValues.get(key), current) : original;
     }
 
     private void restore(Object options) throws ReflectiveOperationException {

@@ -14,25 +14,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class BatteryCraftConfig {
+    private static final int CONFIG_VERSION = 3;
     private final Path path;
     private final Map<PowerProfile, ProfileSettings> profiles = new EnumMap<>(PowerProfile.class);
     private boolean enabled = true;
     private boolean notifications = true;
-    private boolean hudIndicator = true;
+    private boolean hudIndicator;
     private boolean sodiumIntegration = true;
     private boolean thermalMode;
     private int pollSeconds = 10;
     private int transitionDelaySeconds = 8;
-    private int hudIntervalSeconds = 10;
+    private int hudIntervalSeconds = 900;
     private int lowThreshold = 30;
     private int criticalThreshold = 15;
     private ManualMode manualMode = ManualMode.AUTOMATIC;
 
     private BatteryCraftConfig(Path path) {
         this.path = path;
-        profiles.put(PowerProfile.BATTERY, new ProfileSettings(60, 10, 8, 1, true, true, 2, 0.80));
-        profiles.put(PowerProfile.LOW_BATTERY, new ProfileSettings(45, 8, 6, 2, false, false, 1, 0.65));
-        profiles.put(PowerProfile.CRITICAL_BATTERY, new ProfileSettings(30, 6, 5, 2, false, false, 0, 0.50));
+        profiles.put(PowerProfile.BATTERY, new ProfileSettings(120, 8, 5, 1, false, false, 0, 0.65));
+        profiles.put(PowerProfile.LOW_BATTERY, new ProfileSettings(90, 6, 4, 2, false, false, 0, 0.50));
+        profiles.put(PowerProfile.CRITICAL_BATTERY, new ProfileSettings(60, 4, 3, 2, false, false, 0, 0.50));
     }
 
     public static BatteryCraftConfig load(Path path) {
@@ -43,30 +44,45 @@ public final class BatteryCraftConfig {
                 return config;
             }
             String json = Files.readString(path, StandardCharsets.UTF_8);
+            int configVersion = integer(json, "configVersion", 1);
             config.enabled = bool(json, "enabled", config.enabled);
             config.notifications = bool(json, "notifications", config.notifications);
-            config.hudIndicator = bool(json, "hudIndicator", config.hudIndicator);
+            // beta.3 enabled the periodic action-bar message by default. Keep it off once during migration
+            // so existing players are not interrupted every few seconds after upgrading.
+            config.hudIndicator = configVersion >= 2
+                    && bool(json, "hudIndicator", config.hudIndicator);
             config.sodiumIntegration = bool(json, "sodiumIntegration", config.sodiumIntegration);
             config.thermalMode = bool(json, "thermalMode", config.thermalMode);
             config.pollSeconds = bounded(integer(json, "pollSeconds", config.pollSeconds), 5, 300);
             config.transitionDelaySeconds = bounded(integer(json, "transitionDelaySeconds", config.transitionDelaySeconds), 0, 60);
-            config.hudIntervalSeconds = bounded(integer(json, "hudIntervalSeconds", config.hudIntervalSeconds), 5, 60);
+            config.hudIntervalSeconds = bounded(integer(json, "hudIntervalSeconds", config.hudIntervalSeconds), 5, Integer.MAX_VALUE);
             config.lowThreshold = bounded(integer(json, "lowThreshold", config.lowThreshold), 2, 99);
             config.criticalThreshold = bounded(integer(json, "criticalThreshold", config.criticalThreshold), 1, config.lowThreshold - 1);
             config.manualMode = enumValue(json, "manualMode", ManualMode.class, config.manualMode);
+            Map<PowerProfile, ProfileSettings> defaults = new EnumMap<>(config.profiles);
             config.loadProfile(json, PowerProfile.BATTERY, "battery");
             config.loadProfile(json, PowerProfile.LOW_BATTERY, "lowBattery");
             config.loadProfile(json, PowerProfile.CRITICAL_BATTERY, "criticalBattery");
+            if (configVersion < 3) {
+                config.migrateProfile(PowerProfile.BATTERY, new ProfileSettings(60, 10, 8, 1, true, true, 2, 0.80), defaults);
+                config.migrateProfile(PowerProfile.LOW_BATTERY, new ProfileSettings(45, 8, 6, 2, false, false, 1, 0.65), defaults);
+                config.migrateProfile(PowerProfile.CRITICAL_BATTERY, new ProfileSettings(30, 6, 5, 2, false, false, 0, 0.50), defaults);
+            }
+            if (configVersion < CONFIG_VERSION) config.save();
         } catch (IOException | RuntimeException error) {
             System.err.println("[BatteryCraft] Invalid config; defaults will be used: " + error.getMessage());
         }
         return config;
     }
 
+    private void migrateProfile(PowerProfile profile, ProfileSettings legacy, Map<PowerProfile, ProfileSettings> defaults) {
+        if (legacy.equals(profiles.get(profile))) profiles.put(profile, defaults.get(profile));
+    }
+
     private void loadProfile(String json, PowerProfile profile, String prefix) {
         ProfileSettings old = profiles.get(profile);
         profiles.put(profile, new ProfileSettings(
-                bounded(integer(json, prefix + ".maxFps", old.maxFps()), 15, 260),
+                bounded(integer(json, prefix + ".maxFps", old.maxFps()), 0, 260),
                 bounded(integer(json, prefix + ".renderDistance", old.renderDistance()), 2, 64),
                 bounded(integer(json, prefix + ".simulationDistance", old.simulationDistance()), 2, 32),
                 bounded(integer(json, prefix + ".particleLevel", old.particleLevel()), 0, 2),
@@ -80,6 +96,7 @@ public final class BatteryCraftConfig {
     public synchronized void save() throws IOException {
         Files.createDirectories(path.getParent());
         StringBuilder json = new StringBuilder("{\n")
+                .append(line("configVersion", CONFIG_VERSION))
                 .append(line("enabled", enabled)).append(line("notifications", notifications))
                 .append(line("hudIndicator", hudIndicator)).append(line("sodiumIntegration", sodiumIntegration))
                 .append(line("thermalMode", thermalMode)).append(line("pollSeconds", pollSeconds))
@@ -154,7 +171,7 @@ public final class BatteryCraftConfig {
     public int transitionDelaySeconds() { return transitionDelaySeconds; }
     public void transitionDelaySeconds(int value) { transitionDelaySeconds = bounded(value, 0, 60); }
     public int hudIntervalSeconds() { return hudIntervalSeconds; }
-    public void hudIntervalSeconds(int value) { hudIntervalSeconds = bounded(value, 5, 60); }
+    public void hudIntervalSeconds(int value) { hudIntervalSeconds = bounded(value, 5, Integer.MAX_VALUE); }
     public int lowThreshold() { return lowThreshold; }
     public void lowThreshold(int value) { lowThreshold = bounded(value, 2, 99); }
     public int criticalThreshold() { return criticalThreshold; }

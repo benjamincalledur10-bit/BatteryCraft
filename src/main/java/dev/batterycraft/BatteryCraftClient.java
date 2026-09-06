@@ -24,7 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class BatteryCraftClient implements ClientModInitializer {
-    public static final String VERSION = "1.0.0-beta.3";
+    public static final String VERSION = "1.0.0-beta.4";
     private final MacBatteryProvider batteryProvider = new MacBatteryProvider();
     private final MacThermalProvider thermalProvider = new MacThermalProvider();
     private final MinecraftSettingsAdapter settings = new MinecraftSettingsAdapter();
@@ -32,6 +32,7 @@ public final class BatteryCraftClient implements ClientModInitializer {
     private final ConfigurableKeyMappings keyMappings = new ConfigurableKeyMappings();
     private final SessionStats stats = new SessionStats();
     private final ProfileStabilizer stabilizer = new ProfileStabilizer();
+    private final dev.batterycraft.ui.StatusMessageTimer statusTimer = new dev.batterycraft.ui.StatusMessageTimer();
     private volatile PowerProfile activeProfile;
     private volatile BatteryStatus lastBattery;
     private volatile long nextBatteryRead;
@@ -80,8 +81,8 @@ public final class BatteryCraftClient implements ClientModInitializer {
             thermalWarning = thermalProvider.hasThermalWarning();
             if (thermalWarning) applySelectedProfile();
         }
-        long hudInterval = config.hudIntervalSeconds() * 1_000L;
-        if (config.hudIndicator() && lastBattery != null && now / hudInterval != (now - 1_000) / hudInterval) {
+        if (statusTimer.due(System.nanoTime(), config.enabled() && config.manualMode() != ManualMode.DISABLED
+                && config.hudIndicator() && lastBattery != null, config.hudIntervalSeconds())) {
             String remaining = lastBattery.remainingText().isEmpty() ? "" : " | " + lastBattery.remainingText();
             client.message("BatteryCraft: " + LocalizedText.profile(activeProfile) + " | "
                     + lastBattery.percentage() + "%" + remaining, true);
@@ -129,6 +130,7 @@ public final class BatteryCraftClient implements ClientModInitializer {
     }
 
     private void configurationChanged() {
+        statusTimer.reset();
         activeProfile = null;
         stabilizer.reset();
         nextBatteryRead = 0;
