@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.0.0-beta.4 - Unreleased
+## 1.0.0-beta.4 - 2026-09-06
+
+### Clearer configuration
+
+- Renamed the FPS control to "Maximum FPS on battery" and clarified that zero retains Minecraft's original cap.
+- Added explicit 15 minutes + 0 seconds and 30 minutes + 0 seconds reminder examples.
+- Updated the README with the beta.4 release and maintainer-confirmed 1.21.11/Sodium menu behavior, without claiming measured performance or autonomy gains.
 
 ### Startup fix after alpha.2
 

@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.2"><img alt="Beta.4 preview build" src="https://img.shields.io/badge/preview-1.0.0--beta.4-f0b429?style=for-the-badge"></a>
+  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4"><img alt="BatteryCraft 1.0.0-beta.4 release" src="https://img.shields.io/badge/release-1.0.0--beta.4-2ea44f?style=for-the-badge"></a>
   <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/benjamincalledur10-bit/BatteryCraft/total?style=for-the-badge&logo=github&label=GitHub&cacheSeconds=172800"></a>
   <a href="https://modrinth.com/mod/batterycraft"><img alt="Modrinth downloads" src="https://img.shields.io/modrinth/dt/MkPnWU22?style=for-the-badge&logo=modrinth&label=Modrinth&cacheSeconds=172800"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/batterycraft"><img alt="CurseForge downloads" src="https://img.shields.io/curseforge/dt/1618334?style=for-the-badge&logo=curseforge&label=CurseForge&cacheSeconds=172800"></a>
@@ -29,10 +29,10 @@ Choose an official distribution page:
 
 - [Modrinth](https://modrinth.com/mod/batterycraft) — published **1.0.0-beta.3**.
 - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/batterycraft) — published **1.0.0-beta.3**.
-- [GitHub prerelease](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.2) — **beta.4 preview**, with builds for all three Minecraft targets.
+- [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4) — **1.0.0-beta.4**, with builds for all three Minecraft targets.
 
-The GitHub preview uses the tag `v1.0.0-alpha.2`; its mod version and JAR names
-are `1.0.0-beta.4`. BatteryCraft is currently in prerelease development.
+The current GitHub release is **v1.0.0-beta.4**. Its tag, mod version, and JAR
+names now match.
 Download the `.jar` matching your Minecraft version and keep it intact.
 
 ## Highlights
@@ -69,7 +69,9 @@ caps than beta.3:
 Low battery starts at **30%** and critical battery at **15%** by default. Both
 thresholds and all profile values are configurable.
 
-- Set an FPS cap to **0** to retain Minecraft's original FPS setting.
+- **Maximum FPS on battery** controls the cap while that profile is active.
+  Set it to **0** to keep Minecraft's original cap; this does not necessarily
+  mean unlimited FPS.
 - Lighter original visual settings are respected rather than increased.
 - Unchanged legacy profiles migrate to the new defaults; custom profiles remain.
 - Periodic messages wait a full interval after being enabled or reconfigured.
@@ -91,7 +93,7 @@ in game. See [CHANGELOG.md](CHANGELOG.md) for the full history.
 | Optional integration | Sodium entity-distance adjustment |
 | Interface languages | English and Spanish |
 
-| Minecraft target | Required Java | Beta.4 preview file |
+| Minecraft target | Required Java | Beta.4 file |
 | --- | --- | --- |
 | 1.21.x | Java 21 | `batterycraft-1.0.0-beta.4-mc1.21.jar` |
 | 26.1.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.1.jar` |
@@ -100,6 +102,12 @@ in game. See [CHANGELOG.md](CHANGELOG.md) for the full history.
 Previously tested combinations include Minecraft 1.21.11 with Keo Optimized,
 26.1.2 with SodiumPlus, and 26.2 with Fabulously Optimized and Lumina shaders.
 These are prior compatibility checks, not beta.4 performance benchmarks.
+
+The maintainer also confirmed the corrected native menu works in Minecraft
+**1.21.11 with Fabulously Optimized and Sodium 0.8.12**. In that session,
+BatteryCraft reached its configured **120 FPS cap on battery** and restored the
+original settings when connected. These observations confirm profile behavior;
+they do not establish an FPS gain or measured battery-life improvement.
 
 ## Installation
 
@@ -121,10 +129,12 @@ are not registered on this path.
 
 For a 15-minute reminder, enable **Periodic battery message** under
 **Notifications**, set **Message interval: minutes** to **15** and the extra
-seconds to **0**, then click **Apply**. Use **30** for a half-hour interval.
+seconds to **0**, then click **Apply**: **15 minutes + 0 seconds**.
+Use **30 minutes + 0 seconds** for a half-hour interval. The first message
+waits the full interval after applying.
 
-This native integration is included in the `v1.0.0-alpha.2` GitHub preview;
-the earlier `v1.0.0-alpha.1` JARs do not contain it. Without the Sodium Config API,
+This release includes the native menu and the startup fix validated after the
+alpha.2 preview. Without the Sodium Config API,
 the older separate configuration window and shortcuts remain the fallback:
 
 
@@ -159,7 +169,7 @@ while a power-saving profile is active.
 
 ## Development
 
-`main` contains the current beta.4 development snapshot. Published versions and
+`main` contains the current beta.4 release source. Published versions and
 preview builds are listed under [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases).
 
 Build and run the automated tests with the Gradle wrapper and a Java 21 toolchain:

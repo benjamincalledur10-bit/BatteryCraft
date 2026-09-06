@@ -68,6 +68,8 @@ public final class BatteryCraftConfigScreen {
         intervalUnit.setSelectedIndex(config.hudIntervalSeconds() % 60 == 0 ? 1 : 0);
         JPanel intervalControls = new JPanel(new GridLayout(1, 2, 6, 0));
         intervalControls.add(hudInterval); intervalControls.add(intervalUnit);
+        hudInterval.setToolTipText(text(spanish, "For a 15-minute reminder, enter 15 and select Minutes, then Save and apply.",
+                "Para un aviso cada 15 minutos, escribe 15 y elige Minutos; después pulsa Guardar y aplicar."));
         JComboBox<ManualMode> mode = new JComboBox<>(ManualMode.values());
         mode.setSelectedItem(config.manualMode());
 
@@ -173,6 +175,8 @@ public final class BatteryCraftConfigScreen {
             super(new GridLayout(0, 2, 8, 8));
             setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
             fps = spinner(settings.maxFps(), 0, 260, 5);
+            fps.setToolTipText(text(spanish, "0 keeps Minecraft's original FPS cap; it does not necessarily mean unlimited FPS.",
+                    "0 conserva el límite original de Minecraft; no significa necesariamente FPS ilimitados."));
             render = spinner(settings.renderDistance(), 2, 64, 1);
             simulation = spinner(settings.simulationDistance(), 2, 32, 1);
             particles = spinner(settings.particleLevel(), 0, 2, 1);
@@ -180,7 +184,7 @@ public final class BatteryCraftConfigScreen {
             entityDistance = new JSpinner(new SpinnerNumberModel(settings.entityDistanceScale(), 0.25, 1.0, 0.05));
             clouds = new JCheckBox(text(spanish, "Enabled", "Activadas"), settings.clouds());
             shadows = new JCheckBox(text(spanish, "Enabled", "Activadas"), settings.entityShadows());
-            row(text(spanish, "FPS cap (0 = Minecraft setting)", "Límite FPS (0 = ajuste de Minecraft)"), fps);
+            row(text(spanish, "Maximum FPS on battery", "FPS máximos en batería"), fps);
             row(text(spanish, "Render distance", "Distancia de renderizado"), render);
             row(text(spanish, "Simulation distance", "Distancia de simulación"), simulation);
             row(text(spanish, "Particles (0-2)", "Partículas (0-2)"), particles);
