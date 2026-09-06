@@ -11,7 +11,10 @@ repositories {
 
 dependencies {
     compileOnly("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
-    testRuntimeOnly("net.caffeinemc:sodium-fabric-api:0.8.12+mc1.21.11")
+    testRuntimeOnly("net.caffeinemc:sodium-fabric:0.8.12+mc1.21.11") { isTransitive = false }
+    testRuntimeOnly("org.apache.commons:commons-lang3:3.20.0")
+    testRuntimeOnly("com.google.guava:guava:33.5.0-jre")
+    testRuntimeOnly("it.unimi.dsi:fastutil:8.5.18")
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

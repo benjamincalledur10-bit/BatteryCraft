@@ -16,6 +16,7 @@ public final class SodiumOptions {
     private final BatteryCraftConfig config;
     private final Runnable save;
     private final Map<String, Runnable> pending = new LinkedHashMap<>();
+    private final java.util.List<Runnable> pageRegistrations = new java.util.ArrayList<>();
     private Object builder;
     private Object storage;
     private Integer minutes;
@@ -30,6 +31,7 @@ public final class SodiumOptions {
 
     public void register(Object builder) {
         this.builder = builder;
+        pageRegistrations.clear();
         storage = callback(type("net.caffeinemc.mods.sodium.api.config.StorageEventHandler"), args -> {
             flush();
             return null;
@@ -57,14 +59,19 @@ public final class SodiumOptions {
         profile(mod, "battery", PowerProfile.BATTERY);
         profile(mod, "low_battery", PowerProfile.LOW_BATTERY);
         profile(mod, "critical_battery", PowerProfile.CRITICAL_BATTERY);
+        // Sodium eagerly builds children when they are attached. Populate each group first.
+        pageRegistrations.forEach(Runnable::run);
+        pageRegistrations.clear();
     }
 
     private Object page(Object mod, String key) {
         Object page = call(builder, "createOptionPage");
         call(page, "setName", translated(key));
         Object group = call(builder, "createOptionGroup");
-        call(page, "addOptionGroup", group);
-        call(mod, "addPage", page);
+        pageRegistrations.add(() -> {
+            call(page, "addOptionGroup", group);
+            call(mod, "addPage", page);
+        });
         return group;
     }
 

@@ -2,6 +2,11 @@
 
 ## 1.0.0-beta.4 - Unreleased
 
+### Startup fix after alpha.2
+
+- Fixed a startup crash while registering Sodium options: groups and pages are now attached only after their contents are populated.
+- Added a regression test using Sodium 0.8.12's actual builders, reproducing the original empty-group rejection and validating all five pages and 36 options.
+
 ### Native Sodium configuration
 
 - Added BatteryCraft to Sodium's video-settings sidebar through its public Config API.

@@ -13,8 +13,34 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.*;
 import static dev.batterycraft.compat.sodium.SodiumReflection.*;
 
-/** Contract tests use Sodium's published API JAR, not copied API interfaces. */
+/** Tests cover the published API contracts and Sodium's real eager builder implementation. */
 class SodiumOptionsTest {
+    @Test void buildsPagesWithRealSodiumImplementation(@TempDir Path directory) throws Exception {
+        BatteryCraftConfig config = BatteryCraftConfig.load(directory.resolve("batterycraft.json"));
+        Class<?> metadataType = type("net.caffeinemc.mods.sodium.client.config.ConfigManager$ModMetadata");
+        Object metadata = metadataType.getConstructor(String.class, String.class).newInstance("BatteryCraft", "1.0.0-beta.4");
+        java.util.function.Function<String, Object> metadataProvider = id -> metadata;
+        Object builder = type("net.caffeinemc.mods.sodium.client.config.builder.ConfigBuilderImpl")
+                .getConstructor(java.util.function.Function.class, String.class).newInstance(metadataProvider, "batterycraft");
+        new SodiumOptions(config, () -> {}).register(builder);
+        Collection<?> mods = (Collection<?>) call(builder, "build");
+        assertEquals(1, mods.size());
+        Object mod = mods.iterator().next();
+        Collection<?> pages = (Collection<?>) call(mod, "pages");
+        assertEquals(5, pages.size());
+        int optionCount = 0;
+        for (Object page : pages) {
+            Collection<?> groups = (Collection<?>) call(page, "groups");
+            assertFalse(groups.isEmpty());
+            for (Object group : groups) {
+                Collection<?> options = (Collection<?>) call(group, "options");
+                assertFalse(options.isEmpty());
+                optionCount += options.size();
+            }
+        }
+        assertEquals(36, optionCount, "All options must survive Sodium's eager snapshots");
+    }
+
     private static final String API = "net.caffeinemc.mods.sodium.api.config.structure.";
 
     @Test void registersNativePagesWithoutChangingConfiguration(@TempDir Path directory) {
