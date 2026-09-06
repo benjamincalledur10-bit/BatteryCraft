@@ -1,85 +1,179 @@
 # BatteryCraft
 
-**Play longer on your MacBook.** BatteryCraft is a client-side Fabric mod that automatically lowers Minecraft's power usage when you unplug your charger, then safely restores your original settings when external power returns.
+<p align="center">
+  <img src="src/main/resources/assets/batterycraft/icon.png" alt="BatteryCraft icon" width="112">
+</p>
 
-## 1.0.0-beta.4
+<p align="center">
+  <strong>Your world. Less rendering load. More control.</strong><br>
+  Automatic battery-aware profiles for Minecraft: Java Edition on MacBook.<br>
+  Unplug to switch to lighter settings. Reconnect to restore your own.
+</p>
 
-- Periodic center-screen status messages are now disabled by default, including after upgrading from beta.3.
-- The optional status interval can now be configured in seconds or minutes (including 15 and 30 minutes).
-- Added versioned configuration migrations for safer upgrades.
-- New battery profiles prioritize lighter rendering: 120 FPS / 8 render chunks / 5 simulation chunks; low battery: 90 / 6 / 4; critical: 60 / 4 / 3.
-- FPS values are configurable caps, not guaranteed frame rates. Set a profile cap to `0` to retain Minecraft's original FPS setting.
-- Existing custom profiles are preserved; unchanged legacy defaults migrate to the new profiles.
-- Visual profiles never increase your original render/simulation distances, entity distance, biome blend, clouds, shadows or particle density.
-- Connecting the charger restores your original settings, including your FPS cap. BatteryCraft does not impose a minimum plugged-in frame rate.
+<p align="center">
+  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.1"><img alt="Beta.4 preview build" src="https://img.shields.io/badge/preview-1.0.0--beta.4-f0b429?style=for-the-badge"></a>
+  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/benjamincalledur10-bit/BatteryCraft/total?style=for-the-badge&logo=github&label=GitHub&cacheSeconds=172800"></a>
+  <a href="https://modrinth.com/mod/batterycraft"><img alt="Modrinth downloads" src="https://img.shields.io/modrinth/dt/MkPnWU22?style=for-the-badge&logo=modrinth&label=Modrinth&cacheSeconds=172800"></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/batterycraft"><img alt="CurseForge downloads" src="https://img.shields.io/curseforge/dt/1618334?style=for-the-badge&logo=curseforge&label=CurseForge&cacheSeconds=172800"></a>
+</p>
 
-Actual FPS and battery life depend on hardware, shaders, world complexity and other mods. Higher FPS can increase power use; beta.4 performance and autonomy gains have not yet been benchmarked in game.
+<p align="center">
+  macOS · Fabric · Client-side only · MIT licensed
+</p>
 
-- Automatic battery, low-battery and emergency profiles.
-- Restores the player's original settings when power returns, including after an unexpected game shutdown.
-- Shows the macOS battery-time estimate in the optional HUD indicator.
-- Uses a configurable transition delay to prevent rapid profile switching.
-- Two native Minecraft key mappings appear under Options > Controls > Key Binds > BatteryCraft.
-- `B` cycles through automatic, manual and disabled modes by default.
-- `O` opens the visual configuration screen by default.
-- Both keys can be reassigned or unbound by the player and work normally on macOS.
-- Optional notifications and periodic in-game status message.
-- Configurable HUD refresh interval.
-- Editable FPS, render distance, simulation distance, particles, clouds, entity shadows, biome blend and entity distance.
-- Sodium detection and optional entity-distance integration.
-- Experimental macOS thermal-warning mode.
-- Local session summary with battery and profile-change statistics.
-- English/Spanish configuration UI and a local diagnostics panel.
-- No administrator privileges, telemetry or Internet connection.
-
-The configuration is stored at `config/batterycraft.json`. While a power-saving profile is active,
-the original Minecraft values are protected in `config/batterycraft-recovery.properties`; the file is
-removed automatically after a successful restoration. Existing configurations are upgraded with safe defaults.
-
-## Why BatteryCraft?
-
-- Works automatically in the background with battery, low-battery and critical profiles.
-- Adjusts FPS, render distance, simulation distance, particles and other demanding settings.
-- Smart Recovery protects your original settings—even if Minecraft closes unexpectedly.
-- Includes editable profiles, an optional HUD, notifications and experimental thermal protection.
-- Supports Sodium entity-distance integration when Sodium is installed.
-- Runs entirely on your device: no telemetry, Internet connection or administrator access.
+Download counters use a 48-hour cache and may lag behind the distribution pages.
 
 ## Download
 
-- [Modrinth](https://modrinth.com/mod/batterycraft)
-- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/batterycraft)
-- [GitHub](https://github.com/benjamincalledur10-bit/BatteryCraft)
+Choose an official distribution page:
 
-### Compatibility
+- [Modrinth](https://modrinth.com/mod/batterycraft) — published **1.0.0-beta.3**.
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/batterycraft) — published **1.0.0-beta.3**.
+- [GitHub prerelease](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.1) — **beta.4 preview**, with builds for all three Minecraft targets.
 
-- `batterycraft-1.0.0-beta.4-mc1.21.jar`: Minecraft 1.21.x
-- `batterycraft-1.0.0-beta.4-mc26.1.jar`: Minecraft 26.1.x
-- `batterycraft-1.0.0-beta.4-mc26.2.jar`: Minecraft 26.2.x
+The GitHub preview uses the tag `v1.0.0-alpha.1`; its mod version and JAR names
+are `1.0.0-beta.4`. BatteryCraft is currently in prerelease development.
+Download the `.jar` matching your Minecraft version and keep it intact.
 
-Fabric API is required. Minecraft 1.21.x needs Java 21; Minecraft 26.1.x and 26.2.x need Java 25.
+## Highlights
 
-BatteryCraft is designed for macOS laptops and is not required on the server.
+- **Automatic power profiles:** switch between plugged-in, battery, low-battery,
+  and critical-battery settings as your power state changes.
+- **Lighter rendering:** tune render and simulation distances, particles, clouds,
+  entity shadows, biome blend, and entity distance alongside your FPS cap.
+- **Smart Recovery:** protect your original settings on disk while a profile is
+  active, so they can be restored even after an unexpected game shutdown.
+- **Quiet by default in beta.4:** periodic battery messages start disabled. Enable
+  them with your own interval in seconds or minutes, including 15 or 30 minutes.
+- **Your controls, your profiles:** edit each profile, choose automatic or manual
+  mode, and rebind the configuration and mode-switching keys.
+- **Built for MacBook:** macOS battery detection, optional remaining-time
+  estimates, and an experimental thermal-warning mode.
+- **Local and private:** English/Spanish configuration, session statistics,
+  diagnostics, and optional Sodium integration. No telemetry, Internet
+  connection, or administrator privileges required by the mod.
+
+## What's new in beta.4?
+
+The new defaults prioritize lower rendering distances while allowing higher FPS
+caps than beta.3:
+
+| Power profile | FPS cap | Render distance | Simulation distance |
+| --- | ---: | ---: | ---: |
+| Plugged in | Your original setting | Your original setting | Your original setting |
+| Battery | 120 | 8 chunks | 5 chunks |
+| Low battery | 90 | 6 chunks | 4 chunks |
+| Critical battery | 60 | 4 chunks | 3 chunks |
+
+Low battery starts at **30%** and critical battery at **15%** by default. Both
+thresholds and all profile values are configurable.
+
+- Set an FPS cap to **0** to retain Minecraft's original FPS setting.
+- Lighter original visual settings are respected rather than increased.
+- Unchanged legacy profiles migrate to the new defaults; custom profiles remain.
+- Periodic messages wait a full interval after being enabled or reconfigured.
+
+These values are **caps, not guaranteed frame rates**. BatteryCraft adjusts game
+settings; it does not replace Minecraft's renderer. Actual FPS and battery life
+depend on hardware, resolution, shaders, world complexity, and other mods.
+Higher FPS can increase power use. Beta.4 gains have not yet been benchmarked
+in game. See [CHANGELOG.md](CHANGELOG.md) for the full history.
+
+## Compatibility
+
+| Component | Support |
+| --- | --- |
+| Operating system | macOS laptops with a battery |
+| Game | Minecraft: Java Edition |
+| Mod loader | Fabric Loader with Fabric API |
+| Installation side | Client only; no server installation required |
+| Optional integration | Sodium entity-distance adjustment |
+| Interface languages | English and Spanish |
+
+| Minecraft target | Required Java | Beta.4 preview file |
+| --- | --- | --- |
+| 1.21.x | Java 21 | `batterycraft-1.0.0-beta.4-mc1.21.jar` |
+| 26.1.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.1.jar` |
+| 26.2.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.2.jar` |
+
+Previously tested combinations include Minecraft 1.21.11 with Keo Optimized,
+26.1.2 with SodiumPlus, and 26.2 with Fabulously Optimized and Lumina shaders.
+These are prior compatibility checks, not beta.4 performance benchmarks.
 
 ## Installation
 
 1. Install Fabric Loader and Fabric API for your Minecraft version.
-2. Download the matching BatteryCraft file.
-3. Place the file in your Minecraft `mods` folder.
-4. Press `O` in game to configure BatteryCraft. Press `B` to cycle modes.
+2. Download the matching BatteryCraft JAR from an official source above.
+3. Place it in your Minecraft instance's `mods` folder. Do not extract it.
+4. Remove any older BatteryCraft JAR from that instance to avoid duplicates.
+5. Launch Minecraft, then press **O** to open the configuration screen.
+6. Leave the mode on **Automatic** to switch profiles with your battery state.
 
-## Tested combinations
+## Configuration tips
 
-- Minecraft 1.21.11 with Keo Optimized.
-- Minecraft 26.1.2 with SodiumPlus.
-- Minecraft 26.2 with Fabulously Optimized and Lumina shaders.
+| Control | Default key |
+| --- | --- |
+| Open configuration | **O** |
+| Cycle automatic, manual, and disabled modes | **B** |
 
-## Build
+Reassign or unbind these keys under **Options > Controls > Key Binds > BatteryCraft**.
+
+- **Fewer interruptions:** leave periodic status messages off, or enable them
+  and select **Minutes** with a value such as **15** or **30**. Profile-change
+  notifications have their own toggle.
+- **More FPS headroom:** raise the profile cap or use **0** to retain your
+  Minecraft setting, then lower rendering distances to reduce workload.
+- **Stronger battery savings:** choose a lower FPS cap as well as lighter visual
+  settings. Maximum frame rate and minimum power use are different priorities.
+- **Smoother power transitions:** adjust the transition delay to avoid rapid
+  switching. Critical battery activates immediately.
+- **After an upgrade:** review your profiles. Beta.4 disables beta.3's periodic
+  message once during migration; you can enable it again whenever you want.
+
+Configuration lives inside your Minecraft instance:
+
+```text
+config/batterycraft.json                 # Preferences and power profiles
+config/batterycraft-recovery.properties  # Protected original settings
+```
+
+The recovery file is removed after successful restoration. Keep it in place
+while a power-saving profile is active.
+
+## Development
+
+`main` contains the current beta.4 development snapshot. Published versions and
+preview builds are listed under [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases).
+
+Build and run the automated tests with the Gradle wrapper and a Java 21 toolchain:
 
 ```bash
 ./gradlew clean test releaseJars
 ```
 
-## License
+The three target JARs are written to `build/libs/`. Automated checks cover
+configuration migration, reminder timing, power profiles, battery-output
+parsing, key bindings, and settings recovery. In-game testing is still needed
+for compatibility, frame rate, and autonomy measurements.
 
-MIT
+## Feedback and support
+
+Found a bug or have an idea? Open a [GitHub issue](https://github.com/benjamincalledur10-bit/BatteryCraft/issues).
+Include your Mac model, macOS version, Minecraft version, Fabric Loader version,
+BatteryCraft version, active profile, and relevant mods or shaders. Add logs and
+steps to reproduce when available.
+
+For performance reports, compare the same world, route, resolution, shaders,
+and display brightness, and mention whether the charger was connected. FPS
+observations and battery measurements help improve future profiles.
+
+If BatteryCraft is useful to you, consider starring the repository or sharing
+its official download page with another MacBook player.
+
+## Credits and license
+
+- **Main developer:** Benjiaa
+- **License:** [MIT](LICENSE)
+
+Explore another project by Benjiaa:
+[Lumina Shader: Event Horizon](https://github.com/benjamincalledur10-bit/Lumina_Shader_Event_Horizon).
