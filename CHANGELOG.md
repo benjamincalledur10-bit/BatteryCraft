@@ -2,6 +2,15 @@
 
 ## 1.0.0-beta.4 - Unreleased
 
+### Native Sodium configuration
+
+- Added BatteryCraft to Sodium's video-settings sidebar through its public Config API.
+- Added native General, Notifications, Battery, Low battery and Critical battery pages with English/Spanish labels and tooltips.
+- All 36 editable options use Sodium's Apply/cancel flow; interval minutes and seconds are combined when applying.
+- Native-menu users no longer depend on or register the old B/O key bindings.
+- Optional integration keeps Sodium out of the required runtime dependencies.
+- Added contract tests against the published Sodium 0.8.12 API for registration, deferred saving, compound intervals and profile updates.
+
 ### Less intrusive status display
 
 - Disabled the periodic center-screen status message by default.

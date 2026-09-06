@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.1"><img alt="Beta.4 preview build" src="https://img.shields.io/badge/preview-1.0.0--beta.4-f0b429?style=for-the-badge"></a>
+  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.2"><img alt="Beta.4 preview build" src="https://img.shields.io/badge/preview-1.0.0--beta.4-f0b429?style=for-the-badge"></a>
   <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/benjamincalledur10-bit/BatteryCraft/total?style=for-the-badge&logo=github&label=GitHub&cacheSeconds=172800"></a>
   <a href="https://modrinth.com/mod/batterycraft"><img alt="Modrinth downloads" src="https://img.shields.io/modrinth/dt/MkPnWU22?style=for-the-badge&logo=modrinth&label=Modrinth&cacheSeconds=172800"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/batterycraft"><img alt="CurseForge downloads" src="https://img.shields.io/curseforge/dt/1618334?style=for-the-badge&logo=curseforge&label=CurseForge&cacheSeconds=172800"></a>
@@ -29,9 +29,9 @@ Choose an official distribution page:
 
 - [Modrinth](https://modrinth.com/mod/batterycraft) — published **1.0.0-beta.3**.
 - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/batterycraft) — published **1.0.0-beta.3**.
-- [GitHub prerelease](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.1) — **beta.4 preview**, with builds for all three Minecraft targets.
+- [GitHub prerelease](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-alpha.2) — **beta.4 preview**, with builds for all three Minecraft targets.
 
-The GitHub preview uses the tag `v1.0.0-alpha.1`; its mod version and JAR names
+The GitHub preview uses the tag `v1.0.0-alpha.2`; its mod version and JAR names
 are `1.0.0-beta.4`. BatteryCraft is currently in prerelease development.
 Download the `.jar` matching your Minecraft version and keep it intact.
 
@@ -45,8 +45,9 @@ Download the `.jar` matching your Minecraft version and keep it intact.
   active, so they can be restored even after an unexpected game shutdown.
 - **Quiet by default in beta.4:** periodic battery messages start disabled. Enable
   them with your own interval in seconds or minutes, including 15 or 30 minutes.
-- **Your controls, your profiles:** edit each profile, choose automatic or manual
-  mode, and rebind the configuration and mode-switching keys.
+- **Native video-settings pages:** with Sodium Config API, find BatteryCraft
+  alongside the other mods in Video Settings. Edit profiles, notifications, and
+  power mode, then use Apply to save everything.
 - **Built for MacBook:** macOS battery detection, optional remaining-time
   estimates, and an experimental thermal-warning mode.
 - **Local and private:** English/Spanish configuration, session statistics,
@@ -106,10 +107,26 @@ These are prior compatibility checks, not beta.4 performance benchmarks.
 2. Download the matching BatteryCraft JAR from an official source above.
 3. Place it in your Minecraft instance's `mods` folder. Do not extract it.
 4. Remove any older BatteryCraft JAR from that instance to avoid duplicates.
-5. Launch Minecraft, then press **O** to open the configuration screen.
+5. Launch Minecraft and open **Options > Video Settings > BatteryCraft**
+   with Sodium 0.8+ Config API installed.
 6. Leave the mode on **Automatic** to switch profiles with your battery state.
 
 ## Configuration tips
+
+With a compatible Sodium Config API, use **Esc > Options > Video Settings >
+BatteryCraft**. The sidebar contains **General**, **Notifications**, **Battery**,
+**Low battery**, and **Critical battery**. All settings stay inside Minecraft;
+Sodium manages editing, cancellation, and **Apply**. The separate B/O key bindings
+are not registered on this path.
+
+For a 15-minute reminder, enable **Periodic battery message** under
+**Notifications**, set **Message interval: minutes** to **15** and the extra
+seconds to **0**, then click **Apply**. Use **30** for a half-hour interval.
+
+This native integration is included in the `v1.0.0-alpha.2` GitHub preview;
+the earlier `v1.0.0-alpha.1` JARs do not contain it. Without the Sodium Config API,
+the older separate configuration window and shortcuts remain the fallback:
+
 
 | Control | Default key |
 | --- | --- |
@@ -119,7 +136,7 @@ These are prior compatibility checks, not beta.4 performance benchmarks.
 Reassign or unbind these keys under **Options > Controls > Key Binds > BatteryCraft**.
 
 - **Fewer interruptions:** leave periodic status messages off, or enable them
-  and select **Minutes** with a value such as **15** or **30**. Profile-change
+  and set the interval to **15** or **30** minutes. Profile-change
   notifications have their own toggle.
 - **More FPS headroom:** raise the profile cap or use **0** to retain your
   Minecraft setting, then lower rendering distances to reduce workload.

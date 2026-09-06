@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class BatteryCraftClient implements ClientModInitializer {
+    private static BatteryCraftClient instance;
     public static final String VERSION = "1.0.0-beta.4";
     private final MacBatteryProvider batteryProvider = new MacBatteryProvider();
     private final MacThermalProvider thermalProvider = new MacThermalProvider();
@@ -47,7 +48,9 @@ public final class BatteryCraftClient implements ClientModInitializer {
         config = BatteryCraftConfig.load(configPath);
         settings.configureRecovery(configPath.resolveSibling("batterycraft-recovery.properties"));
         sodiumLoaded = FabricLoader.getInstance().isModLoaded("sodium");
-        boolean mappingsRegistered = keyMappings.register();
+        instance = this;
+        boolean sodiumMenu = hasSodiumConfigApi();
+        boolean mappingsRegistered = !sodiumMenu && keyMappings.register();
         System.out.printf("[BatteryCraft] Starting %s macOS=%s arch=%s sodium=%s keyMappings=%s recovery=%s%n",
                 VERSION, batteryProvider.isSupported(), System.getProperty("os.arch", "unknown"),
                 sodiumLoaded, mappingsRegistered, settings.hasPendingRecovery());
@@ -62,7 +65,23 @@ public final class BatteryCraftClient implements ClientModInitializer {
             return thread;
         });
         service.scheduleWithFixedDelay(this::monitor, 2, 1, TimeUnit.SECONDS);
-        service.scheduleWithFixedDelay(this::hotkeys, 2, 150, TimeUnit.MILLISECONDS);
+        if (!sodiumMenu) service.scheduleWithFixedDelay(this::hotkeys, 2, 150, TimeUnit.MILLISECONDS);
+    }
+
+    private static boolean hasSodiumConfigApi() {
+        try {
+            Class.forName("net.caffeinemc.mods.sodium.api.config.ConfigEntryPoint", false, BatteryCraftClient.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException ignored) { return false; }
+    }
+
+    public static void registerSodiumOptions(Object builder) {
+        if (instance == null) throw new IllegalStateException("BatteryCraft client has not initialized");
+        new dev.batterycraft.compat.sodium.SodiumOptions(instance.config, () -> {
+            try { instance.config.save(); }
+            catch (java.io.IOException error) { throw new IllegalStateException("Could not save BatteryCraft options", error); }
+            instance.configurationChanged();
+        }).register(builder);
     }
 
     private void monitor() {

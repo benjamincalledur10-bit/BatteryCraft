@@ -5,11 +5,13 @@ version = providers.gradleProperty("mod_version").get()
 
 repositories {
     mavenCentral()
+    maven("https://maven.caffeinemc.net/releases")
     maven("https://maven.fabricmc.net/")
 }
 
 dependencies {
     compileOnly("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
+    testRuntimeOnly("net.caffeinemc:sodium-fabric-api:0.8.12+mc1.21.11")
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
