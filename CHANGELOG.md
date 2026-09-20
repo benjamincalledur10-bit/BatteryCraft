@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-beta.4 — Minecraft 26.3 target — 2026-09-20
+
+- Added a separate `batterycraft-1.0.0-beta.4-mc26.3.jar` build for Minecraft 26.3.x.
+- Requires Java 25, Fabric Loader 0.19.5 or newer, and Fabric API for 26.3.
+- Retains beta.4's version, profiles, and features.
+- Resolve modern B/O shortcut defaults from Minecraft's input constants for the SDL input backend.
+- Support the SDL keyboard type and 26.3's separate chat/overlay message methods while retaining older-version fallbacks.
+- In-game validation on Minecraft 26.3 is pending.
+
 ## 1.0.0-beta.4 - 2026-09-06
 
 ### Clearer configuration

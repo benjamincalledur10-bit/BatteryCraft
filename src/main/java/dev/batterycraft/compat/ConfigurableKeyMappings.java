@@ -46,10 +46,14 @@ public final class ConfigurableKeyMappings {
         Object category = categoryFactory.invoke(null, identifier);
 
         Class<?> inputType = Class.forName("com.mojang.blaze3d.platform.InputConstants$Type");
-        Object keysym = enumConstant(inputType, "KEYSYM");
+        Object keyboard = keyboardType(inputType);
+        // Minecraft 26.3 uses SDL key codes; resolve defaults from the game.
+        Class<?> inputConstants = Class.forName("com.mojang.blaze3d.platform.InputConstants");
+        int cycleKey = inputConstants.getField("KEY_B").getInt(null);
+        int configKey = inputConstants.getField("KEY_O").getInt(null);
         Constructor<?> constructor = keyType.getConstructor(String.class, inputType, int.class, categoryType);
-        cycle = constructor.newInstance("key.batterycraft.cycle_profile", keysym, 66, category);
-        config = constructor.newInstance("key.batterycraft.open_config", keysym, 79, category);
+        cycle = constructor.newInstance("key.batterycraft.cycle_profile", keyboard, cycleKey, category);
+        config = constructor.newInstance("key.batterycraft.open_config", keyboard, configKey, category);
         Class<?> helper = Class.forName("net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper");
         invokeRegistration(helper, "registerKeyMapping", cycle);
         invokeRegistration(helper, "registerKeyMapping", config);
@@ -82,6 +86,14 @@ public final class ConfigurableKeyMappings {
             try { return Class.forName(name); } catch (ClassNotFoundException ignored) { }
         }
         throw new ClassNotFoundException(names[0]);
+    }
+
+    static Object keyboardType(Class<?> type) throws ReflectiveOperationException {
+        try {
+            return enumConstant(type, "KEYBOARD");
+        } catch (NoSuchFieldException ignored) {
+            return enumConstant(type, "KEYSYM");
+        }
     }
 
     private static Object enumConstant(Class<?> type, String name) throws ReflectiveOperationException {

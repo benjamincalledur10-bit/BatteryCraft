@@ -29,7 +29,7 @@ Choose an official distribution page:
 
 - [Modrinth](https://modrinth.com/mod/batterycraft) — published **1.0.0-beta.3**.
 - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/batterycraft) — published **1.0.0-beta.3**.
-- [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4) — **1.0.0-beta.4**, with builds for all three Minecraft targets.
+- [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4) — **1.0.0-beta.4**, with builds for all four Minecraft targets.
 
 The current GitHub release is **v1.0.0-beta.4**. Its tag, mod version, and JAR
 names now match.
@@ -98,6 +98,11 @@ in game. See [CHANGELOG.md](CHANGELOG.md) for the full history.
 | 1.21.x | Java 21 | `batterycraft-1.0.0-beta.4-mc1.21.jar` |
 | 26.1.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.1.jar` |
 | 26.2.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.2.jar` |
+| 26.3.x (in-game validation pending) | Java 25 | `batterycraft-1.0.0-beta.4-mc26.3.jar` |
+
+The Minecraft 26.3 build requires Fabric Loader 0.19.5 or newer and Fabric API
+for 26.3. It retains the beta.4 profiles and features. The additional 26.3 JAR is available in the same GitHub release; in-game
+validation is pending.
 
 Previously tested combinations include Minecraft 1.21.11 with Keo Optimized,
 26.1.2 with SodiumPlus, and 26.2 with Fabulously Optimized and Lumina shaders.
@@ -178,7 +183,7 @@ Build and run the automated tests with the Gradle wrapper and a Java 21 toolchai
 ./gradlew clean test releaseJars
 ```
 
-The three target JARs are written to `build/libs/`. Automated checks cover
+The four target JARs are written to `build/libs/`. Automated checks cover
 configuration migration, reminder timing, power profiles, battery-output
 parsing, key bindings, and settings recovery. In-game testing is still needed
 for compatibility, frame rate, and autonomy measurements.

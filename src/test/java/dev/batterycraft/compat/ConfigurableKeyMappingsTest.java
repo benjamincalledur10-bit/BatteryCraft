@@ -9,6 +9,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConfigurableKeyMappingsTest {
+    enum SdlInputType { KEYBOARD, MOUSE }
+    enum GlfwInputType { KEYSYM, SCANCODE, MOUSE }
+
+    @Test
+    void resolvesKeyboardTypeBeforeAndAfterSdlMigration() throws ReflectiveOperationException {
+        assertEquals(SdlInputType.KEYBOARD, ConfigurableKeyMappings.keyboardType(SdlInputType.class));
+        assertEquals(GlfwInputType.KEYSYM, ConfigurableKeyMappings.keyboardType(GlfwInputType.class));
+    }
+
     @Test
     void registersAndConsumesLegacyFabricKeyMappings() {
         KeyBindingHelper.REGISTERED.clear();

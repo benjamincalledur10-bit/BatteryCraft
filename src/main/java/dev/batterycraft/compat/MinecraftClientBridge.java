@@ -51,6 +51,15 @@ public final class MinecraftClientBridge {
                     return;
                 }
             }
+            // 26.3 separates chat and action-bar messages into single-argument methods.
+            String messageMethod = actionBar ? "sendOverlayMessage" : "sendSystemMessage";
+            for (Method method : player.getClass().getMethods()) {
+                if (method.getName().equals(messageMethod) && method.getParameterCount() == 1
+                        && method.getParameterTypes()[0].isInstance(component)) {
+                    method.invoke(player, component);
+                    return;
+                }
+            }
         } catch (ReflectiveOperationException ignored) { }
     }
 
