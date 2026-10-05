@@ -42,6 +42,7 @@ public final class SodiumOptions {
         bool(general, "enabled", true, config::enabled, config::enabled);
         enumOption(general, "mode", ManualMode.class, ManualMode.AUTOMATIC, config::manualMode, config::manualMode);
         bool(general, "sodium", true, config::sodiumIntegration, config::sodiumIntegration);
+        bool(general, "allow_higher_fps", false, config::allowHigherFps, config::allowHigherFps);
         bool(general, "thermal", false, config::thermalMode, config::thermalMode);
         integer(general, "low_threshold", 2, 99, 30, config::lowThreshold, value -> lowThreshold = value, "%");
         integer(general, "critical_threshold", 1, 98, 15, config::criticalThreshold, value -> criticalThreshold = value, "%");

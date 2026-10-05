@@ -17,6 +17,7 @@ class BatteryCraftConfigTest {
         BatteryCraftConfig config = BatteryCraftConfig.load(path);
         assertTrue(config.enabled());
         assertFalse(config.hudIndicator());
+        assertFalse(config.allowHigherFps());
         assertEquals(10, config.pollSeconds());
         BatteryCraftConfig reloaded = BatteryCraftConfig.load(path);
         assertEquals(config.lowThreshold(), reloaded.lowThreshold());
@@ -38,7 +39,23 @@ class BatteryCraftConfigTest {
         BatteryCraftConfig migrated = BatteryCraftConfig.load(path);
 
         assertFalse(migrated.hudIndicator());
-        assertTrue(Files.readString(path).contains("\"configVersion\": 3"));
+        assertTrue(Files.readString(path).contains("\"configVersion\": 4"));
+    }
+
+    @Test
+    void migratesBeta4WithoutChangingCustomProfilesOrReminders(@TempDir Path directory) throws Exception {
+        Path path = directory.resolve("batterycraft.json");
+        Files.writeString(path, """
+                {"configVersion": 3, "hudIndicator": true, "hudIntervalSeconds": 1800,
+                 "battery.maxFps": 77, "battery.renderDistance": 7}
+                """);
+        BatteryCraftConfig migrated = BatteryCraftConfig.load(path);
+        assertFalse(migrated.allowHigherFps());
+        assertTrue(migrated.hudIndicator());
+        assertEquals(1800, migrated.hudIntervalSeconds());
+        assertEquals(77, migrated.profile(dev.batterycraft.profile.PowerProfile.BATTERY).maxFps());
+        assertEquals(7, migrated.profile(dev.batterycraft.profile.PowerProfile.BATTERY).renderDistance());
+        assertTrue(Files.readString(path).contains("\"configVersion\": 4"));
     }
 
     @Test
@@ -59,7 +76,7 @@ class BatteryCraftConfigTest {
         config.profile(dev.batterycraft.profile.PowerProfile.LOW_BATTERY,
                 new dev.batterycraft.profile.ProfileSettings(77, 7, 4, 2, false, false, 0, 0.50));
         config.save();
-        Files.writeString(path, Files.readString(path).replace("\"configVersion\": 3", "\"configVersion\": 1"));
+        Files.writeString(path, Files.readString(path).replace("\"configVersion\": 4", "\"configVersion\": 1"));
         BatteryCraftConfig migrated = BatteryCraftConfig.load(path);
         assertEquals(120, migrated.profile(dev.batterycraft.profile.PowerProfile.BATTERY).maxFps());
         assertEquals(77, migrated.profile(dev.batterycraft.profile.PowerProfile.LOW_BATTERY).maxFps());
@@ -76,6 +93,7 @@ class BatteryCraftConfigTest {
         config.hudIndicator(false);
         config.sodiumIntegration(false);
         config.thermalMode(true);
+        config.allowHigherFps(true);
         config.transitionDelaySeconds(12);
         config.hudIntervalSeconds(20);
         config.manualMode(dev.batterycraft.profile.ManualMode.LOW_BATTERY);
@@ -88,6 +106,7 @@ class BatteryCraftConfigTest {
         assertEquals(false, reloaded.hudIndicator());
         assertEquals(false, reloaded.sodiumIntegration());
         assertTrue(reloaded.thermalMode());
+        assertTrue(reloaded.allowHigherFps());
         assertEquals(12, reloaded.transitionDelaySeconds());
         assertEquals(20, reloaded.hudIntervalSeconds());
         assertEquals(dev.batterycraft.profile.ManualMode.LOW_BATTERY, reloaded.manualMode());

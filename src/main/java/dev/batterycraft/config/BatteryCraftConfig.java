@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class BatteryCraftConfig {
-    private static final int CONFIG_VERSION = 3;
+    private static final int CONFIG_VERSION = 4;
     private final Path path;
     private final Map<PowerProfile, ProfileSettings> profiles = new EnumMap<>(PowerProfile.class);
     private boolean enabled = true;
@@ -22,6 +22,7 @@ public final class BatteryCraftConfig {
     private boolean hudIndicator;
     private boolean sodiumIntegration = true;
     private boolean thermalMode;
+    private boolean allowHigherFps;
     private int pollSeconds = 10;
     private int transitionDelaySeconds = 8;
     private int hudIntervalSeconds = 900;
@@ -52,6 +53,7 @@ public final class BatteryCraftConfig {
             config.hudIndicator = configVersion >= 2
                     && bool(json, "hudIndicator", config.hudIndicator);
             config.sodiumIntegration = bool(json, "sodiumIntegration", config.sodiumIntegration);
+            config.allowHigherFps = bool(json, "allowHigherFps", false);
             config.thermalMode = bool(json, "thermalMode", config.thermalMode);
             config.pollSeconds = bounded(integer(json, "pollSeconds", config.pollSeconds), 5, 300);
             config.transitionDelaySeconds = bounded(integer(json, "transitionDelaySeconds", config.transitionDelaySeconds), 0, 60);
@@ -99,6 +101,7 @@ public final class BatteryCraftConfig {
                 .append(line("configVersion", CONFIG_VERSION))
                 .append(line("enabled", enabled)).append(line("notifications", notifications))
                 .append(line("hudIndicator", hudIndicator)).append(line("sodiumIntegration", sodiumIntegration))
+                .append(line("allowHigherFps", allowHigherFps))
                 .append(line("thermalMode", thermalMode)).append(line("pollSeconds", pollSeconds))
                 .append(line("transitionDelaySeconds", transitionDelaySeconds))
                 .append(line("hudIntervalSeconds", hudIntervalSeconds))
@@ -164,6 +167,8 @@ public final class BatteryCraftConfig {
     public void hudIndicator(boolean value) { hudIndicator = value; }
     public boolean sodiumIntegration() { return sodiumIntegration; }
     public void sodiumIntegration(boolean value) { sodiumIntegration = value; }
+    public boolean allowHigherFps() { return allowHigherFps; }
+    public void allowHigherFps(boolean value) { allowHigherFps = value; }
     public boolean thermalMode() { return thermalMode; }
     public void thermalMode(boolean value) { thermalMode = value; }
     public int pollSeconds() { return pollSeconds; }

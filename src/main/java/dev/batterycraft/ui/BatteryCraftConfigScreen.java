@@ -59,6 +59,9 @@ public final class BatteryCraftConfigScreen {
         JCheckBox indicator = new JCheckBox(text(spanish, "Show periodic status message", "Mostrar estado periódicamente"), config.hudIndicator());
         JCheckBox sodium = new JCheckBox(text(spanish, "Sodium integration", "Integración con Sodium"), config.sodiumIntegration());
         JCheckBox thermal = new JCheckBox(text(spanish, "Experimental thermal mode", "Modo térmico experimental"), config.thermalMode());
+        JCheckBox higherFps = new JCheckBox(text(spanish, "Allow profiles to raise the FPS cap", "Permitir que los perfiles suban el límite de FPS"), config.allowHigherFps());
+        higherFps.setToolTipText(text(spanish, "Off by default: use the lower of your own cap and the profile cap. Higher FPS may consume more battery.",
+                "Desactivado por defecto: usa el menor entre tu límite y el del perfil. Más FPS pueden consumir más batería."));
         JSpinner low = new JSpinner(new SpinnerNumberModel(config.lowThreshold(), 2, 99, 1));
         JSpinner critical = new JSpinner(new SpinnerNumberModel(config.criticalThreshold(), 1, 98, 1));
         JSpinner poll = new JSpinner(new SpinnerNumberModel(config.pollSeconds(), 5, 300, 1));
@@ -77,7 +80,7 @@ public final class BatteryCraftConfigScreen {
         general.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
         general.add(enabled); general.add(notifications);
         general.add(indicator); general.add(sodium);
-        general.add(thermal); general.add(new JLabel(""));
+        general.add(thermal); general.add(higherFps);
         general.add(new JLabel(text(spanish, "Low battery (%)", "Batería baja (%)"))); general.add(low);
         general.add(new JLabel(text(spanish, "Critical battery (%)", "Batería crítica (%)"))); general.add(critical);
         general.add(new JLabel(text(spanish, "Battery poll (seconds)", "Revisión de batería (segundos)"))); general.add(poll);
@@ -122,6 +125,7 @@ public final class BatteryCraftConfigScreen {
                 config.hudIndicator(indicator.isSelected());
                 config.sodiumIntegration(sodium.isSelected());
                 config.thermalMode(thermal.isSelected());
+                config.allowHigherFps(higherFps.isSelected());
                 config.lowThreshold((Integer) low.getValue());
                 config.criticalThreshold((Integer) critical.getValue());
                 config.pollSeconds((Integer) poll.getValue());
@@ -175,8 +179,8 @@ public final class BatteryCraftConfigScreen {
             super(new GridLayout(0, 2, 8, 8));
             setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
             fps = spinner(settings.maxFps(), 0, 260, 5);
-            fps.setToolTipText(text(spanish, "0 keeps Minecraft's original FPS cap; it does not necessarily mean unlimited FPS.",
-                    "0 conserva el límite original de Minecraft; no significa necesariamente FPS ilimitados."));
+            fps.setToolTipText(text(spanish, "0 keeps the original cap. By default, a lower original cap takes priority. Detected manual edits are respected.",
+                    "0 conserva el límite original. Por defecto se respeta el original si es menor. Se conservan los cambios manuales detectados."));
             render = spinner(settings.renderDistance(), 2, 64, 1);
             simulation = spinner(settings.simulationDistance(), 2, 32, 1);
             particles = spinner(settings.particleLevel(), 0, 2, 1);

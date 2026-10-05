@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class MinecraftSettingsAdapter {
     private static final String[] CLIENT_CLASSES = {
@@ -29,10 +30,15 @@ public final class MinecraftSettingsAdapter {
     }
 
     public synchronized boolean apply(PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded) {
+        return apply(profile, profileSettings, sodiumLoaded, false);
+    }
+
+    public synchronized boolean apply(PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded,
+                                      boolean allowHigherFps) {
         try {
             Object client = findClient();
             if (client == null) return false;
-            Runnable update = () -> updateOnClientThread(client, profile, profileSettings, sodiumLoaded);
+            Runnable update = () -> updateOnClientThread(client, profile, profileSettings, sodiumLoaded, allowHigherFps);
             Method execute = findMethod(client.getClass(), new String[]{"execute", "method_18859"}, Runnable.class);
             if (execute != null) execute.invoke(client, update); else update.run();
             return true;
@@ -42,7 +48,7 @@ public final class MinecraftSettingsAdapter {
         }
     }
 
-    private void updateOnClientThread(Object client, PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded) {
+    private synchronized void updateOnClientThread(Object client, PowerProfile profile, ProfileSettings profileSettings, boolean sodiumLoaded, boolean allowHigherFps) {
         try {
             Object options = readField(client, new String[]{"options", "field_1690"});
             if (options == null) return;
@@ -53,7 +59,7 @@ public final class MinecraftSettingsAdapter {
             if (profileSettings.maxFps() == 0) {
                 restoreOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"});
             } else {
-                setOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"}, profileSettings.maxFps());
+                setOption(options, "maxFps", new String[]{"framerateLimit", "maxFps", "field_1909"}, profileSettings.maxFps(), allowHigherFps);
             }
             setOption(options, "viewDistance", new String[]{"renderDistance", "viewDistance", "field_1870"}, profileSettings.renderDistance());
             setOption(options, "simulationDistance", new String[]{"simulationDistance", "field_34959"}, profileSettings.simulationDistance());
@@ -73,13 +79,14 @@ public final class MinecraftSettingsAdapter {
         Object option = readField(options, new String[]{"cloudRenderMode", "cloudStatus", "field_1814"});
         if (option == null) return;
         Object current = getOptionValue(option);
+        if (preserveManualChange("clouds", current)) return;
         rememberOriginal("clouds", current);
         if (current instanceof Enum<?> enumValue) {
             Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
             Object baseline = originalValue("clouds", current);
             int originalIndex = baseline instanceof Enum<?> original ? original.ordinal() : enumValue.ordinal();
             int index = enabled ? Math.min(originalIndex, 1) : 0;
-            setOptionValue(option, constants[index]);
+            writeTracked(option, "clouds", constants[index]);
         }
     }
 
@@ -87,29 +94,36 @@ public final class MinecraftSettingsAdapter {
         Object option = readField(options, new String[]{"particles", "field_1882"});
         if (option == null) return;
         Object current = getOptionValue(option);
+        if (preserveManualChange("particles", current)) return;
         rememberOriginal("particles", current);
         if (current instanceof Enum<?> enumValue) {
             Object[] constants = enumValue.getDeclaringClass().getEnumConstants();
             Object baseline = originalValue("particles", current);
             int originalIndex = baseline instanceof Enum<?> original ? original.ordinal() : enumValue.ordinal();
-            setOptionValue(option, constants[Math.min(Math.max(level, originalIndex), constants.length - 1)]);
+            writeTracked(option, "particles", constants[Math.min(Math.max(level, originalIndex), constants.length - 1)]);
         }
     }
 
     private void setOption(Object options, String key, String[] names, Object value) throws ReflectiveOperationException {
+        setOption(options, key, names, value, false);
+    }
+
+    private void setOption(Object options, String key, String[] names, Object value, boolean allowHigherFps)
+            throws ReflectiveOperationException {
         Object option = readField(options, names);
         if (option == null) return;
         Object current = getOptionValue(option);
+        if (preserveManualChange(key, current)) return;
         rememberOriginal(key, current);
         Object original = originalValues.get(key);
         if (original == null && persistedValues.containsKey(key)) original = decode(persistedValues.get(key), current);
         // Visual profiles are ceilings: never raise a player's lighter settings.
-        if (!key.equals("maxFps") && original instanceof Number baseline && value instanceof Number requested) {
+        if ((!key.equals("maxFps") || !allowHigherFps) && original instanceof Number baseline && value instanceof Number requested) {
             if (requested.doubleValue() > baseline.doubleValue()) value = original;
         } else if (original instanceof Boolean baseline && value instanceof Boolean requested) {
             value = baseline && requested;
         }
-        setOptionValue(option, value);
+        writeTracked(option, key, value);
     }
 
     private Object originalValue(String key, Object current) {
@@ -134,11 +148,39 @@ public final class MinecraftSettingsAdapter {
     private void restoreOption(Object options, String key, String[] names) throws ReflectiveOperationException {
         Object option = readField(options, names);
         if (option == null) return;
+        if (preserveManualChange(key, getOptionValue(option))) return;
         Object value = originalValues.get(key);
         if (value == null && persistedValues.containsKey(key)) {
             value = decode(persistedValues.get(key), getOptionValue(option));
         }
-        if (value != null) setOptionValue(option, value);
+        if (value != null) writeTracked(option, key, value);
+    }
+
+    // A changed value belongs to the player (or another mod). Leave that setting alone
+    // until this saving session ends; keep managing all other settings independently.
+    private boolean preserveManualChange(String key, Object current) {
+        String lastApplied = persistedValues.get("applied." + key);
+        boolean changed = lastApplied != null && !Objects.equals(decode(lastApplied, current), current);
+        if (changed) {
+            persistedValues.put("manual." + key, "true");
+            persistedValues.put(key, encode(current));
+            originalValues.put(key, current);
+            persistRecovery();
+        }
+        return Boolean.parseBoolean(persistedValues.get("manual." + key));
+    }
+
+    private void writeTracked(Object option, String key, Object value) throws ReflectiveOperationException {
+        // Persist intent before mutation, then capture the accepted value (setters may clamp).
+        persistedValues.put("applied." + key, encode(value));
+        persistRecovery();
+        setOptionValue(option, value);
+        persistedValues.put("applied." + key, encode(getOptionValue(option)));
+        persistRecovery();
+    }
+
+    private void persistRecovery() {
+        if (recoveryStore != null) recoveryStore.save(persistedValues);
     }
 
     private void rememberOriginal(String key, Object value) {

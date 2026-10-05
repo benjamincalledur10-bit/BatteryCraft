@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class BatteryCraftClient implements ClientModInitializer {
     private static BatteryCraftClient instance;
-    public static final String VERSION = "1.0.0-beta.4";
+    public static final String VERSION = "1.0.0-beta.5";
     private final MacBatteryProvider batteryProvider = new MacBatteryProvider();
     private final MacThermalProvider thermalProvider = new MacThermalProvider();
     private final MinecraftSettingsAdapter settings = new MinecraftSettingsAdapter();
@@ -114,12 +114,12 @@ public final class BatteryCraftClient implements ClientModInitializer {
         if (selected == activeProfile) return;
         ProfileSettings values = selected == PowerProfile.PLUGGED_IN ? null : config.profile(selected);
         boolean sodiumIntegration = sodiumLoaded && config.sodiumIntegration();
-        if (settings.apply(selected, values, sodiumIntegration)) {
+        if (settings.apply(selected, values, sodiumIntegration, config.allowHigherFps())) {
             activeProfile = selected;
             stats.profileChanged(selected);
             String message = selected == PowerProfile.PLUGGED_IN
-                    ? "BatteryCraft: " + LocalizedText.value("original settings restored", "ajustes originales restaurados")
-                    : "BatteryCraft: " + LocalizedText.profile(selected) + " - " + values.maxFps() + " FPS";
+                    ? "BatteryCraft: " + LocalizedText.value("settings restored; manual edits preserved", "ajustes restaurados; cambios manuales respetados")
+                    : "BatteryCraft: " + LocalizedText.profile(selected);
             if (config.notifications()) client.message(message, false);
             System.out.printf("[BatteryCraft] Profile=%s battery=%d%% pluggedIn=%s thermal=%s sodium=%s%n",
                     selected, lastBattery.percentage(), lastBattery.pluggedIn(), thermalWarning, sodiumIntegration);

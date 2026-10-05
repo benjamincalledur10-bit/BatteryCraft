@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-beta.5 — Pre-release — 2026-10-04
+
+- Keep the lower of the player's original FPS cap and the active profile cap by default.
+- Add an explicit opt-in to raise the FPS cap in both Sodium General options and the fallback configuration window, with English/Spanish guidance.
+- Retain profile cap zero as restoration of the original cap, while respecting detected manual FPS edits.
+- Track original and last-applied values separately for every managed setting. Detected external edits take priority through battery/low/critical transitions and restoration; other settings remain managed.
+- Persist last-applied values and manual ownership for recovery after a crash; retain support for legacy beta.4 recovery snapshots.
+- Migrate configuration to version 4 without replacing custom profiles or reminder preferences.
+- Profile-change notifications no longer report the requested profile cap as if it were the effective cap.
+- Keep all four artifacts: Minecraft 1.21.x (Java 21), 26.1.x, 26.2.x and 26.3.x (Java 25), with the existing loader requirements.
+- Add regression coverage for lower caps, explicit opt-in, manual edits, fresh sessions, crash recovery, legacy snapshots and named/intermediary option access.
+- In-game validation and battery measurements are pending on all four targets. Detection requires a value different from the last-applied value; unsaved edits cannot survive a game restart.
+
 ## 1.0.0-beta.4 — Minecraft 26.3 target — 2026-09-20
 
 - Added a separate `batterycraft-1.0.0-beta.4-mc26.3.jar` build for Minecraft 26.3.x.

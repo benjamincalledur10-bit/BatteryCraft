@@ -45,12 +45,14 @@
   "batterycraft.options.status.tooltip": "Muestra el porcentaje y el tiempo restante sobre la barra de acceso rápido. Desactivado por defecto.",
   "batterycraft.options.minutes.tooltip": "El intervalo completo es minutos + segundos adicionales. Ejemplo: 15 minutos + 0 segundos, o 30 minutos + 0 segundos. Activa el mensaje periódico y pulsa Aplicar. Mínimo total: 5 segundos.",
   "batterycraft.options.seconds.tooltip": "Los segundos adicionales se suman a los minutos. Para 15 minutos exactos, elige 15 minutos + 0 segundos. Tras Aplicar, el primer mensaje espera el intervalo completo.",
-  "batterycraft.options.fps.tooltip": "FPS máximos mientras este perfil está activo. 0 conserva el límite original de Minecraft; no significa necesariamente FPS ilimitados. Al conectar en modo Automático se restauran tus ajustes originales. Más FPS pueden consumir más batería.",
+  "batterycraft.options.fps.tooltip": "Límite de FPS del perfil. Por defecto se respeta tu límite si es menor. 0 conserva el límite original. Los cambios manuales detectados tienen prioridad; más FPS pueden consumir más batería.",
   "batterycraft.options.render.tooltip": "Distancia máxima de renderizado del perfil. Se conservan los valores originales más bajos.",
   "batterycraft.options.simulation.tooltip": "Distancia máxima de simulación del perfil. Los valores bajos reducen el trabajo de simulación.",
   "batterycraft.options.particles.tooltip": "0: todas; 1: reducidas; 2: mínimas. Se conservan los ajustes originales más ligeros.",
   "batterycraft.options.clouds.tooltip": "Permite nubes en el perfil, respetando si estaban desactivadas originalmente.",
   "batterycraft.options.shadows.tooltip": "Permite sombras de entidades, respetando si estaban desactivadas originalmente.",
   "batterycraft.options.biome.tooltip": "Radio máximo de mezcla de biomas. Los valores bajos reducen el trabajo de mezcla.",
-  "batterycraft.options.entities.tooltip": "Distancia de entidades como porcentaje. Requiere activar la integración de distancia de entidades."
+  "batterycraft.options.entities.tooltip": "Distancia de entidades como porcentaje. Requiere activar la integración de distancia de entidades.",
+  "batterycraft.options.allow_higher_fps": "Permitir subir el límite de FPS",
+  "batterycraft.options.allow_higher_fps.tooltip": "Desactivado por defecto: conserva el menor entre tu límite de FPS y el del perfil. Actívalo para permitir un límite mayor; puede consumir más batería. Los cambios manuales detectados se respetan hasta volver a conectar o desactivar el modo de ahorro."
 }

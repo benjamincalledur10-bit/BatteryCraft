@@ -18,7 +18,7 @@ class SodiumOptionsTest {
     @Test void buildsPagesWithRealSodiumImplementation(@TempDir Path directory) throws Exception {
         BatteryCraftConfig config = BatteryCraftConfig.load(directory.resolve("batterycraft.json"));
         Class<?> metadataType = type("net.caffeinemc.mods.sodium.client.config.ConfigManager$ModMetadata");
-        Object metadata = metadataType.getConstructor(String.class, String.class).newInstance("BatteryCraft", "1.0.0-beta.4");
+        Object metadata = metadataType.getConstructor(String.class, String.class).newInstance("BatteryCraft", "1.0.0-beta.5");
         java.util.function.Function<String, Object> metadataProvider = id -> metadata;
         Object builder = type("net.caffeinemc.mods.sodium.client.config.builder.ConfigBuilderImpl")
                 .getConstructor(java.util.function.Function.class, String.class).newInstance(metadataProvider, "batterycraft");
@@ -38,7 +38,7 @@ class SodiumOptionsTest {
                 optionCount += options.size();
             }
         }
-        assertEquals(36, optionCount, "All options must survive Sodium's eager snapshots");
+        assertEquals(37, optionCount, "All options must survive Sodium's eager snapshots");
     }
 
     private static final String API = "net.caffeinemc.mods.sodium.api.config.structure.";
@@ -49,7 +49,7 @@ class SodiumOptionsTest {
         int[] saves = {0};
         new SodiumOptions(config, () -> saves[0]++).register(registry.proxy("ConfigBuilder"));
         assertEquals(5, registry.pages);
-        assertEquals(36, registry.options.size());
+        assertEquals(37, registry.options.size());
         assertEquals(0, saves[0]);
         assertFalse(config.hudIndicator());
         assertEquals(900, config.hudIntervalSeconds());
@@ -81,13 +81,16 @@ class SodiumOptionsTest {
         registry.set("minutes", 30);
         registry.set("seconds", 7);
         registry.set("status", true);
+        registry.set("allow_higher_fps", true);
         registry.set("battery/fps", 0);
         registry.set("battery/render", 6);
+        assertFalse(config.allowHigherFps());
         assertFalse(config.hudIndicator(), "Bindings are staged until afterSave");
         registry.flush();
         assertEquals(1, saves[0], "The shared storage handler flushes once");
         BatteryCraftConfig reloaded = BatteryCraftConfig.load(config.path());
         assertTrue(reloaded.hudIndicator());
+        assertTrue(reloaded.allowHigherFps());
         assertEquals(1807, reloaded.hudIntervalSeconds());
         assertEquals(0, reloaded.profile(PowerProfile.BATTERY).maxFps());
         assertEquals(6, reloaded.profile(PowerProfile.BATTERY).renderDistance());

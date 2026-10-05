@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4"><img alt="BatteryCraft 1.0.0-beta.4 release" src="https://img.shields.io/badge/release-1.0.0--beta.4-2ea44f?style=for-the-badge"></a>
+  <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.5"><img alt="BatteryCraft 1.0.0-beta.5 pre-release" src="https://img.shields.io/badge/pre--release-1.0.0--beta.5-2ea44f?style=for-the-badge"></a>
   <a href="https://github.com/benjamincalledur10-bit/BatteryCraft/releases"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/benjamincalledur10-bit/BatteryCraft/total?style=for-the-badge&logo=github&label=GitHub&cacheSeconds=172800"></a>
   <a href="https://modrinth.com/mod/batterycraft"><img alt="Modrinth downloads" src="https://img.shields.io/modrinth/dt/MkPnWU22?style=for-the-badge&logo=modrinth&label=Modrinth&cacheSeconds=172800"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/batterycraft"><img alt="CurseForge downloads" src="https://img.shields.io/curseforge/dt/1618334?style=for-the-badge&logo=curseforge&label=CurseForge&cacheSeconds=172800"></a>
@@ -29,10 +29,11 @@ Choose an official distribution page:
 
 - [Modrinth](https://modrinth.com/mod/batterycraft) — published **1.0.0-beta.3**.
 - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/batterycraft) — published **1.0.0-beta.3**.
-- [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4) — **1.0.0-beta.4**, with builds for all four Minecraft targets.
+- [GitHub pre-release](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.5) — **1.0.0-beta.5**, with builds for all four Minecraft targets.
+- [Previous GitHub release](https://github.com/benjamincalledur10-bit/BatteryCraft/releases/tag/v1.0.0-beta.4) — **1.0.0-beta.4**.
 
-The current GitHub release is **v1.0.0-beta.4**. Its tag, mod version, and JAR
-names now match.
+The beta.5 pre-release is intended for testing. In-game validation on all four
+Minecraft targets is pending.
 Download the `.jar` matching your Minecraft version and keep it intact.
 
 ## Highlights
@@ -54,7 +55,37 @@ Download the `.jar` matching your Minecraft version and keep it intact.
   diagnostics, and optional Sodium integration. No telemetry, Internet
   connection, or administrator privileges required by the mod.
 
-## What's new in beta.4?
+## What's new in beta.5?
+
+`main` now builds **1.0.0-beta.5** for Minecraft **1.21.x, 26.1.x, 26.2.x and
+26.3.x**. The GitHub pre-release contains all four JARs; in-game validation is
+still pending.
+
+- **Respect lower FPS caps:** by default, a profile uses the lower of its cap
+  and your original Minecraft cap. Original 60 + profile 120 means **60 FPS**.
+  Enable **Allow profiles to raise the FPS cap** under General to opt in to the
+  previous behavior. Profile cap **0** still restores the original cap.
+- **Preserve manual edits:** before applying or restoring an individual setting,
+  BatteryCraft compares its current value with the last value it applied. A
+  different value is left under your control for the rest of that saving session,
+  including transitions to low or critical battery. Other settings continue to
+  follow the profiles. Reconnecting or disabling saving ends that session; the
+  next one uses your retained settings as its baseline.
+- **Crash recovery:** the recovery file now stores original values, last-applied
+  values and detected manual overrides. Saved manual edits are respected after
+  restarting, including edits made just before a crash. Unsaved game settings
+  cannot be recovered. Existing beta.4 snapshots remain readable, but they lack
+  the last-applied values needed to identify edits made before upgrading.
+- **Detection limits:** this tracks value differences, including changes from
+  other mods. An edit to the same value, or an edit reverted before the next
+  profile application/restoration, cannot be distinguished from no edit.
+- Existing custom profiles and notification preferences are preserved on upgrade.
+
+Build locally with `./gradlew test releaseJars`. In-game checks remain necessary
+on all four targets; automated reflection tests do not establish runtime
+compatibility or measured battery savings.
+
+## Profile defaults (introduced in beta.4)
 
 The new defaults prioritize lower rendering distances while allowing higher FPS
 caps than beta.3:
@@ -71,7 +102,7 @@ thresholds and all profile values are configurable.
 
 - **Maximum FPS on battery** controls the cap while that profile is active.
   Set it to **0** to keep Minecraft's original cap; this does not necessarily
-  mean unlimited FPS.
+  mean unlimited FPS. By default, a lower original cap takes priority.
 - Lighter original visual settings are respected rather than increased.
 - Unchanged legacy profiles migrate to the new defaults; custom profiles remain.
 - Periodic messages wait a full interval after being enabled or reconfigured.
@@ -93,16 +124,16 @@ in game. See [CHANGELOG.md](CHANGELOG.md) for the full history.
 | Optional integration | Sodium entity-distance adjustment |
 | Interface languages | English and Spanish |
 
-| Minecraft target | Required Java | Beta.4 file |
+| Minecraft target | Required Java | Beta.5 pre-release file |
 | --- | --- | --- |
-| 1.21.x | Java 21 | `batterycraft-1.0.0-beta.4-mc1.21.jar` |
-| 26.1.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.1.jar` |
-| 26.2.x | Java 25 | `batterycraft-1.0.0-beta.4-mc26.2.jar` |
-| 26.3.x (in-game validation pending) | Java 25 | `batterycraft-1.0.0-beta.4-mc26.3.jar` |
+| 1.21.x | Java 21 | `batterycraft-1.0.0-beta.5-mc1.21.jar` |
+| 26.1.x | Java 25 | `batterycraft-1.0.0-beta.5-mc26.1.jar` |
+| 26.2.x | Java 25 | `batterycraft-1.0.0-beta.5-mc26.2.jar` |
+| 26.3.x (in-game validation pending) | Java 25 | `batterycraft-1.0.0-beta.5-mc26.3.jar` |
 
-The Minecraft 26.3 build requires Fabric Loader 0.19.5 or newer and Fabric API
-for 26.3. It retains the beta.4 profiles and features. The additional 26.3 JAR is available in the same GitHub release; in-game
-validation is pending.
+All builds require Fabric API for their Minecraft version. Minimum Fabric Loader
+versions are 0.16.0 for 1.21.x, 0.19.0 for 26.1.x, 0.19.3 for 26.2.x, and
+0.19.5 for 26.3.x. The existing 26.3 target still awaits in-game validation.
 
 Previously tested combinations include Minecraft 1.21.11 with Keo Optimized,
 26.1.2 with SodiumPlus, and 26.2 with Fabulously Optimized and Lumina shaders.
@@ -153,7 +184,8 @@ Reassign or unbind these keys under **Options > Controls > Key Binds > BatteryCr
 - **Fewer interruptions:** leave periodic status messages off, or enable them
   and set the interval to **15** or **30** minutes. Profile-change
   notifications have their own toggle.
-- **More FPS headroom:** raise the profile cap or use **0** to retain your
+- **More FPS headroom:** explicitly enable **Allow profiles to raise the FPS cap**
+  to exceed a lower original cap, or use **0** to retain your
   Minecraft setting, then lower rendering distances to reduce workload.
 - **Stronger battery savings:** choose a lower FPS cap as well as lighter visual
   settings. Maximum frame rate and minimum power use are different priorities.
@@ -174,7 +206,7 @@ while a power-saving profile is active.
 
 ## Development
 
-`main` contains the current beta.4 release source. Published versions and
+`main` contains the beta.5 pre-release source. Published versions and
 preview builds are listed under [GitHub Releases](https://github.com/benjamincalledur10-bit/BatteryCraft/releases).
 
 Build and run the automated tests with the Gradle wrapper and a Java 21 toolchain:
@@ -185,8 +217,20 @@ Build and run the automated tests with the Gradle wrapper and a Java 21 toolchai
 
 The four target JARs are written to `build/libs/`. Automated checks cover
 configuration migration, reminder timing, power profiles, battery-output
-parsing, key bindings, and settings recovery. In-game testing is still needed
-for compatibility, frame rate, and autonomy measurements.
+parsing, key bindings, lower FPS caps, manual edits and settings recovery.
+In-game testing is still needed for compatibility, frame rate, and autonomy
+measurements.
+
+Before promoting beta.5 beyond pre-release, repeat these checks on each of the four targets:
+
+1. Set Minecraft's cap to 60, unplug with the Battery profile at 120, and confirm
+   the cap stays at 60. Enable the explicit FPS opt-in and confirm it can reach 120.
+2. Edit FPS and a visual setting while saving is active, switch to low/critical,
+   then reconnect. Confirm your edits remain and untouched settings restore.
+3. Save edits in Minecraft, close unexpectedly, and restart both plugged in and
+   on battery. Check retained edits, restoration and recovery-file cleanup.
+4. Confirm cap 0, disabling saving, and a new unplugged session work correctly.
+   Test Sodium's Apply/cancel path and the fallback UI without Sodium Config API.
 
 ## Feedback and support
 
